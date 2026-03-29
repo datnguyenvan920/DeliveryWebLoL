@@ -14,6 +14,14 @@ body.auth-page{
     min-height:100vh;
 }
 
+/* Make manager pages fill the whole viewport with the dark background */
+body.manager-shell{
+    background: linear-gradient(180deg,#0f0f0f,#111);
+    color: #fff;
+    min-height: 100vh;
+    margin: 0;
+}
+
 .auth-card{
     background: linear-gradient(180deg, var(--brand-dark), rgba(0,0,0,0.6));
     border: 1px solid rgba(255,255,255,0.04);
@@ -82,9 +90,81 @@ body.auth-page{
 .app-navbar .nav-items a{color:var(--muted-text);text-decoration:none;font-weight:600}
 .app-navbar .right-controls{display:flex;gap:12px;align-items:center}
 
+/* small navbar buttons */
+.icon-btn{
+    width:44px;
+    height:34px;
+    border-radius:8px;
+    background:rgba(255,255,255,0.04);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:rgba(255,255,255,0.85);
+    text-decoration:none;
+    border:1px solid rgba(255,255,255,0.04);
+}
+.icon-btn:hover{background:rgba(255,255,255,0.07);color:#fff}
+
+.user-menu{position:relative;}
+.user-btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1px solid rgba(255,255,255,0.04);
+    background:rgba(255,255,255,0.04);
+    color:#fff;
+    height:34px;
+    padding:0 10px;
+    border-radius:999px;
+}
+.user-btn:hover{background:rgba(255,255,255,0.07)}
+.user-btn .avatar{
+    width:26px;height:26px;border-radius:999px;
+    background:rgba(255,255,255,0.12);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+}
+
+/* Bootstrap dropdown menu overrides */
+.user-dropdown.dropdown-menu{
+    right:0;
+    left:auto;
+    top:calc(100% + 10px);
+    width:260px;
+    background:rgba(20,19,19,0.98);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.6);
+    padding:10px;
+    z-index:1000;
+}
+
+.user-dropdown-header{padding:8px 10px 10px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:6px}
+.user-dropdown-header .user-name{font-weight:800}
+.user-dropdown-header .user-sub{font-size:12px;color:rgba(255,255,255,0.6)}
+
+.dd-item{
+    display:block;
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    text-decoration:none;
+    color:rgba(255,255,255,0.85);
+    background:transparent;
+    border:none;
+    text-align:left;
+}
+.dd-item:hover{background:rgba(255,255,255,0.05);color:#fff}
+.dd-form{margin:0;}
+.dd-item.logout{color:#ff5b5b}
+.dd-item.logout:hover{background:rgba(255,91,91,0.12)}
+
+/* Remove Bootstrap default active background for dropdown items */
+.user-dropdown .dropdown-item:active{background:rgba(255,255,255,0.06)}
+
 .app-shell{display:flex;min-height:calc(100vh - 64px)}
 .app-sidebar{width:220px;background:var(--brand-dark);border-right:1px solid rgba(255,255,255,0.03);padding:18px}
-.app-sidebar .tab{padding:10px;border-radius:8px;color:var(--muted-text);margin-bottom:8px;cursor:pointer}
+.app-sidebar .tab{display:block;padding:10px;border-radius:8px;color:var(--muted-text);margin-bottom:8px;cursor:pointer;text-decoration:none}
 .app-sidebar .tab:hover{background:rgba(255,255,255,0.02);color:#fff}
 
 .app-main{flex:1;padding:24px;background:linear-gradient(180deg,#0f0f0f,#111);color:#fff}

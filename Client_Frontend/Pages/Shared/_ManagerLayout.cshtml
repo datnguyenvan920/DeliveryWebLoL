@@ -1,0 +1,94 @@
+﻿@*
+    Manager layout: full-screen shell with top navbar + left sidebar.
+    Uses the same CSS classes defined in wwwroot/css/auth.css.
+*@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Client_Frontend</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Client_Frontend.styles.css" asp-append-version="true" />
+
+    @* Expose API base for client scripts *@
+    <meta name="api-base" content="@(Configuration["ApiBaseUrl"] ?? "")" />
+
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="manager-shell">
+    <header class="app-navbar">
+        <div class="brand">
+            <div class="mark">SM</div>
+            <div>
+                <div style="font-weight:800">SkinsMonkey</div>
+                <div style="font-size:12px;color:rgba(255,255,255,0.6)">Manager Dashboard</div>
+            </div>
+        </div>
+
+        <div class="nav-items">
+            <a href="#">Trao đổi Skin</a>
+            <a href="#">Quà tặng miễn phí</a>
+            <a href="#">Trung tâm trợ giúp</a>
+        </div>
+
+        <div class="right-controls">
+            <div style="color:var(--brand-yellow);font-weight:700">$ 5 Miễn phí</div>
+
+            @* Settings (dummy) *@
+            <a class="icon-btn" href="#" title="Settings">⚙</a>
+
+            @* User menu (Bootstrap dropdown + logout) *@
+            <div class="dropdown user-menu">
+                <button type="button" class="user-btn dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <span class="avatar">U</span>
+                </button>
+
+                <div class="dropdown-menu user-dropdown" role="menu">
+                    <div class="user-dropdown-header">
+                        <div class="user-name">Manager</div>
+                        <div class="user-sub">Signed in</div>
+                    </div>
+                    <a class="dd-item dropdown-item" href="#">Khu vực Cá nhân</a>
+                    <a class="dd-item dropdown-item" href="#">Giao dịch</a>
+                    <a class="dd-item dropdown-item" href="#">Nhận Tiền thưởng</a>
+                    <a class="dd-item dropdown-item" href="#">Mã Khuyến mại</a>
+                    <div class="dropdown-divider" style="border-top-color:rgba(255,255,255,0.06)"></div>
+                    <form method="post" asp-page="/Logout" class="dd-form dropdown-item p-0">
+                        <button type="submit" class="dd-item logout w-100">Đăng xuất</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <a class="tab" asp-page="/ManagerHome">Overview</a>
+            <a class="tab" href="#">Inventory</a>
+            <a class="tab" href="#">Orders</a>
+            <a class="tab" href="#">Deliveries</a>
+            <a class="tab" href="#">Affiliates</a>
+            <a class="tab" href="#">Settings</a>
+        </aside>
+
+        <main class="app-main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        window.__apiBase__ = @System.Text.Json.JsonSerializer.Serialize(Configuration["ApiBaseUrl"] ?? "");
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

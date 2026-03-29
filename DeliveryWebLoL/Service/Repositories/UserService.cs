@@ -36,7 +36,7 @@ namespace DeliveryWebLoL.Service.Repositories
                 Username = username,
                 ContactPhone = phonenumber,
                 Email = email,
-                Role = Enum.IsDefined(typeof(UserRole), role) ? (UserRole)role : UserRole.NewUser,
+                Role = Enum.IsDefined(typeof(UserRole), role) ? (UserRole)role : UserRole.Affiliate,
                 IsActive = true,
                 VerifyNumber = GenerateSixDigitOTP(),
             };
@@ -51,19 +51,15 @@ namespace DeliveryWebLoL.Service.Repositories
 
         public static string GenerateSixDigitOTP()
         {
-            // Generates a random integer between 0 (inclusive) and 1,000,000 (exclusive)
             int secureNumber = RandomNumberGenerator.GetInt32(0, 1000000);
-            // Format the number as a 6-digit string, padding with leading zeros (e.g., 42 becomes "000042")
             return secureNumber.ToString("D6");
         }
 
-        //=================================================================================================================
         public async Task<User?> AuthenticateAsync(string username, string password)
         {
             var user = await _db.Users.SingleOrDefaultAsync(u => u.Username == username);
             if (user == null) return null;
 
-            // Verify the plain password against the stored hash
             var result = _hasher.VerifyHashedPassword(user, user.PasswordHash, password);
             return result == PasswordVerificationResult.Success ? user : null;
         }
@@ -89,14 +85,22 @@ namespace DeliveryWebLoL.Service.Repositories
         public async Task<bool> UpdateRoleAsync(User user, UserRole newRole, string extraData)
         {
             if (user == null) return false;
+            user.Role = newRole;
             if (newRole == UserRole.Affiliate && !extraData.IsNullOrEmpty())
             {
-                user.AffiliationId = extraData; 
+                user.AffiliationId = extraData;
             }
-            user.Role = newRole;
             _db.Users.Update(user);
             await _db.SaveChangesAsync();
             return true;
+        }
+
+        public async Task LogoutAsync(User user)
+        {
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
         }
     }
 }

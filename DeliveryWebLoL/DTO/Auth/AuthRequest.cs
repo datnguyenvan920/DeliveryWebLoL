@@ -26,6 +26,10 @@ namespace DeliveryWebLoL.DTO.Auth
             public int Role { get; set; }
             public string Extra { get; set; } = string.Empty;
         }
+
+        public class LogoutRequest
+        {
+            public string Username { get; set; } = null!;
+        }
     }
-    
 }
