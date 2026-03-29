@@ -19,6 +19,7 @@ namespace DeliveryWebLoL.Data
         public DbSet<DeliveryStop> DeliveryStops { get; set; } = null!;
         public DbSet<Affiliate> Affiliates { get; set; } = null!;
         public DbSet<AffiliateWarehouse> AffiliateWarehouses { get; set; } = null!;
+        public DbSet<LocationItemProduction> LocationItemProductions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +38,34 @@ namespace DeliveryWebLoL.Data
             modelBuilder.Entity<Location>(b =>
             {
                 b.HasMany(l => l.Inventories).WithOne(i => i.Location).HasForeignKey(i => i.LocationID);
+            });
+
+            modelBuilder.Entity<Inventory>(b =>
+            {
+                // Ensure one inventory row per (LocationID, ItemID)
+                b.HasIndex(i => new { i.LocationID, i.ItemID }).IsUnique();
+            });
+
+            modelBuilder.Entity<LocationItemProduction>(b =>
+            {
+                // Composite key: one production rule per (LocationID, ItemID)
+                b.HasKey(p => new { p.LocationID, p.ItemID });
+
+                // Precision for UnitsPerMinute
+                b.Property(p => p.UnitsPerMinute).HasColumnType("decimal(18,6)");
+
+                b.HasOne(p => p.Location)
+                    .WithMany()
+                    .HasForeignKey(p => p.LocationID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasOne(p => p.Item)
+                    .WithMany()
+                    .HasForeignKey(p => p.ItemID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasIndex(p => p.LocationID);
+                b.HasIndex(p => p.ItemID);
             });
 
             modelBuilder.Entity<Affiliate>(b =>

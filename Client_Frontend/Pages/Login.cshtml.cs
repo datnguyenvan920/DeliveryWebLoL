@@ -44,41 +44,46 @@ namespace Client_Frontend.Pages
             // Read content ONCE to avoid ObjectDisposedException (stream already consumed)
             var body = await resp.Content.ReadAsStringAsync();
 
-            // Read response JSON and route based on role
+            string? accessToken = null;
+            int roleValue = -1;
+            string? usernameFromResp = null;
+
             try
             {
                 using var doc = JsonDocument.Parse(body);
 
-                int roleValue = -1;
-                string? usernameFromResp = null;
+                if (doc.RootElement.TryGetProperty("accessToken", out var atEl) && atEl.ValueKind == JsonValueKind.String)
+                    accessToken = atEl.GetString();
 
                 if (doc.RootElement.TryGetProperty("role", out var roleEl) && roleEl.ValueKind == JsonValueKind.Number)
-                {
                     roleEl.TryGetInt32(out roleValue);
-                }
 
                 if (doc.RootElement.TryGetProperty("username", out var unameEl) && unameEl.ValueKind == JsonValueKind.String)
-                {
                     usernameFromResp = unameEl.GetString();
-                }
-
-                // Manager enum value is 1
-                if (roleValue == 1)
-                {
-                    return RedirectToPage("/ManagerHome");
-                }
-
-                // NewUser enum value is 4 in the shared API
-                if (roleValue == 4)
-                {
-                    // preserve username for the ChooseRole page
-                    TempData["username"] = usernameFromResp ?? Input.Username;
-                    return RedirectToPage("/ChooseRole");
-                }
             }
             catch
             {
-                // ignore parsing errors
+                // ignore parsing
+            }
+
+            // Store token + username in session for authorized calls
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                HttpContext.Session.SetString("access_token", accessToken);
+            }
+            HttpContext.Session.SetString("username", usernameFromResp ?? Input.Username);
+
+            // NewUser enum value is 4
+            if (roleValue == 4)
+            {
+                TempData["username"] = usernameFromResp ?? Input.Username;
+                return RedirectToPage("/ChooseRole");
+            }
+
+            // If manager, go to manager home directly
+            if (roleValue == 1)
+            {
+                return RedirectToPage("/ManagerHome");
             }
 
             Message = "Login successful (server-side).";

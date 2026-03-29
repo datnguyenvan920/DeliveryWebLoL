@@ -9,66 +9,57 @@
     <div class="app-grid">
         <section class="card">
             <h3>Warehouses</h3>
-            <div class="list-item">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                        <strong>North Warehouse</strong>
-                        <div><small>Address: 123 North St</small></div>
+
+            @if (Model.Warehouses?.Items == null || Model.Warehouses.Items.Count == 0)
+            {
+                <div class="list-item"><small>No warehouses found.</small></div>
+            }
+            else
+            {
+                @foreach (var w in Model.Warehouses.Items)
+                {
+                    <div class="list-item">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <strong>@w.Name</strong>
+                                <div><small>Address: @w.Address</small></div>
+                            </div>
+                            <div><small>ID: @w.LocationID</small></div>
+                        </div>
                     </div>
-                    <div><small>Stock: 1,240</small></div>
-                </div>
-            </div>
-            <div class="list-item">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                        <strong>Central Warehouse</strong>
-                        <div><small>Address: 10 Central Ave</small></div>
-                    </div>
-                    <div><small>Stock: 3,520</small></div>
-                </div>
-            </div>
-            <div class="list-item">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                        <strong>South Warehouse</strong>
-                        <div><small>Address: 78 South Rd</small></div>
-                    </div>
-                    <div><small>Stock: 860</small></div>
-                </div>
-            </div>
+                }
+            }
         </section>
 
         <section class="card">
-            <h3>Employees</h3>
-            <div class="list-item">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                        <strong>Jane Doe</strong>
-                        <div><small>Role: Worker</small></div>
-                    </div>
-                    <div><small>Assigned: Central</small></div>
-                </div>
-            </div>
+            <h3>Deliverers</h3>
 
-            <div class="list-item">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                        <strong>John Smith</strong>
-                        <div><small>Role: Worker</small></div>
+            @if (Model.Deliverers?.Items == null || Model.Deliverers.Items.Count == 0)
+            {
+                <div class="list-item"><small>No deliverers found.</small></div>
+            }
+            else
+            {
+                @foreach (var d in Model.Deliverers.Items)
+                {
+                    <div class="list-item">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <strong>@d.Username</strong>
+                                <div><small>@(d.Email ?? d.ContactPhone ?? "")</small></div>
+                            </div>
+                            <div><small>Affiliation: @d.AffiliationId</small></div>
+                        </div>
                     </div>
-                    <div><small>Assigned: North</small></div>
-                </div>
-            </div>
-
-            <div class="list-item">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                        <strong>Mai Tran</strong>
-                        <div><small>Role: Worker</small></div>
-                    </div>
-                    <div><small>Assigned: South</small></div>
-                </div>
-            </div>
+                }
+            }
         </section>
+    </div>
+
+    <div style="margin-top:12px; color: rgba(255,255,255,0.6)">
+        <small>
+            Note: these endpoints are protected by JWT ([Authorize]). If the lists are empty due to 401/403,
+            you need to attach the access token (Bearer) in ManagerHomeModel.
+        </small>
     </div>
 </div>

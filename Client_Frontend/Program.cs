@@ -14,6 +14,15 @@ namespace Client_Frontend
             // Add services to the container.
             builder.Services.AddRazorPages();
 
+            // Session storage (for access token)
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.IdleTimeout = TimeSpan.FromHours(8);
+            });
+
             // HttpClient configured to call the API backend.
             // Set ApiBaseUrl in appsettings or launchSettings; fallback is a common local url.
             builder.Services.AddHttpClient("Api", client =>
@@ -34,6 +43,8 @@ namespace Client_Frontend
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthorization();
 

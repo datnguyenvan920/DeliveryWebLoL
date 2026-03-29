@@ -64,8 +64,9 @@ namespace DeliveryWebLoL
                 };
             });
 
-            // register user service
+            // register services
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IManagerService, ManagerService>();
 
             var app = builder.Build();
 
