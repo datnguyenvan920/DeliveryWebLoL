@@ -1,31 +1,96 @@
-﻿@page
+@page
 @model Client_Frontend.Pages.LoginModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign In — DeliveryWebLoL";
+    Layout = null;
 }
-<link rel="stylesheet" href="~/css/auth.css" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sign in to DeliveryWebLoL — the next-generation delivery platform." />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/css/auth.css" />
+</head>
 <body class="auth-page">
+
+    <!-- Floating particles -->
+    <div class="auth-particle"></div>
+    <div class="auth-particle"></div>
+    <div class="auth-particle"></div>
+    <div class="auth-particle"></div>
+    <div class="auth-particle"></div>
+
     <div class="container-auth">
         <div class="auth-card">
+
+            <!-- Logo -->
             <div class="auth-logo">
-                <div class="mark">SM</div>
+                <div class="mark" aria-hidden="true">DW</div>
                 <div>
                     <div class="auth-title">DeliveryWebLoL</div>
                     <div class="auth-sub">Sign in to your account</div>
                 </div>
             </div>
 
-            <form method="post" asp-page-handler="ServerLogin">
-                <div class="mb-2">
-                    <input asp-for="Input.Username" class="form-control auth-input" placeholder="Username" />
+            <div class="auth-section-label">Credentials</div>
+
+            <!-- Login Form -->
+            <form method="post" asp-page-handler="ServerLogin" novalidate id="loginForm">
+
+                <div class="field-group">
+                    <label class="field-label" for="loginUsername">Username</label>
+                    <div class="field-wrapper">
+                        <input asp-for="Input.Username"
+                               id="loginUsername"
+                               class="form-control auth-input"
+                               placeholder="Enter your username"
+                               autocomplete="username"
+                               required />
+                        <span class="field-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="5"></circle>
+                                <path d="M3 21c0-4 3.6-7 9-7s9 3 9 7"></path>
+                            </svg>
+                        </span>
+                    </div>
                 </div>
-                <div class="mb-2">
-                    <input asp-for="Input.Password" class="form-control auth-input" placeholder="Password" type="password" />
+
+                <div class="field-group">
+                    <label class="field-label" for="loginPassword">Password</label>
+                    <div class="field-wrapper">
+                        <input asp-for="Input.Password"
+                               id="loginPassword"
+                               class="form-control auth-input"
+                               placeholder="Enter your password"
+                               type="password"
+                               autocomplete="current-password"
+                               required />
+                        <span class="field-icon" id="togglePasswordIcon" aria-hidden="true" style="cursor:pointer;"
+                              onclick="togglePassword('loginPassword','togglePasswordIcon')">
+                            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </span>
+                    </div>
                 </div>
+
                 <div class="helper-row">
-                    <div></div>
-                    <button type="submit" class="btn-yellow">Sign in</button>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:var(--text-muted)">
+                        <input type="checkbox" id="rememberMe" style="accent-color:var(--brand-yellow);" />
+                        Remember me
+                    </label>
+                    <span class="forgot-txt" tabindex="0" role="button">Forgot password?</span>
                 </div>
+
+                <button type="submit" class="btn-yellow" id="loginSubmitBtn">
+                    Sign In
+                </button>
             </form>
 
             <div class="or-sep">
@@ -34,14 +99,73 @@
                 <div></div>
             </div>
 
-            <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px">
-                <a class="btn-outline-light-custom" href="/Register">Register</a>
-                <button class="btn-outline-light-custom" id="ajaxLoginBtn">AJAX Sign in</button>
+            <div class="action-group">
+                <a class="btn-outline-light-custom" href="/Register" id="goToRegisterBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <line x1="19" y1="8" x2="19" y2="14"></line>
+                        <line x1="22" y1="11" x2="16" y2="11"></line>
+                    </svg>
+                    Register
+                </a>
+                <button class="btn-outline-light-custom" id="ajaxLoginBtn" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 3 21 3 21 8"></polyline>
+                        <line x1="4" y1="20" x2="21" y2="3"></line>
+                        <polyline points="21 16 21 21 16 21"></polyline>
+                        <line x1="15" y1="15" x2="21" y2="21"></line>
+                    </svg>
+                    AJAX Sign In
+                </button>
             </div>
 
-            <div id="result" style="margin-top:12px;color:green">@Model.Message</div>
+            <div id="result" style="margin-top:12px;color:var(--brand-yellow);text-align:center;font-size:13px;">@Model.Message</div>
+
+            <!-- Trust badges -->
+            <div class="trust-row">
+                <div class="trust-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    Secure
+                </div>
+                <div class="trust-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Encrypted
+                </div>
+                <div class="trust-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Trusted Platform
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script src="~/js/auth.js"></script>
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                input.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+    </script>
 </body>
+</html>

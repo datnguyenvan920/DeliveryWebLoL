@@ -1,0 +1,526 @@
+@page
+@model Client_Frontend.Pages.ManagerDashboardModel
+@{
+    ViewData["Title"] = "Manager Dashboard — DeliveryWebLoL";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manager Dashboard — analytics, warehouses, items, and employees." />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/css/auth.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body class="dash-page">
+
+<!-- ── Navbar ─────────────────────────────────────────── -->
+<nav class="dash-navbar">
+    <button class="dash-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
+    <div class="dash-brand">
+        <div class="mark">DW</div>
+        <span class="brand-name">DeliveryWebLoL</span>
+    </div>
+    <div class="dash-navbar-right">
+        <span class="dash-role-badge">Manager</span>
+        <button class="dash-icon-btn" title="Notifications">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+        </button>
+        <a class="dash-icon-btn" href="/Login" title="Sign out">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        </a>
+        <div class="dash-avatar" title="Manager">M</div>
+    </div>
+</nav>
+
+<!-- ── Shell ──────────────────────────────────────────── -->
+<div class="dash-shell">
+
+    <!-- Sidebar -->
+    <aside class="dash-sidebar">
+        <div class="sidebar-section-label">Overview</div>
+        <div class="sidebar-item active" data-tab="analytics" data-group="main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Analytics
+        </div>
+        <div class="sidebar-section-label">Operations</div>
+        <div class="sidebar-item" data-tab="warehouses" data-group="main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            Warehouses
+        </div>
+        <div class="sidebar-item" data-tab="items" data-group="main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            Items
+            <span class="sidebar-badge">24</span>
+        </div>
+        <div class="sidebar-section-label">Team</div>
+        <div class="sidebar-item" data-tab="employees" data-group="main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Employees (Drivers)
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="dash-main">
+
+        <!-- Tabs -->
+        <div class="dash-tabs" data-group="main">
+            <div class="dash-tab active" data-tab="analytics" data-group="main">Analytics</div>
+            <div class="dash-tab" data-tab="warehouses" data-group="main">Warehouses</div>
+            <div class="dash-tab" data-tab="items" data-group="main">Items</div>
+            <div class="dash-tab" data-tab="employees" data-group="main">Employees</div>
+        </div>
+
+        <!-- ════ TAB: ANALYTICS ════ -->
+        <div class="dash-tab-panel active" data-tab="analytics" data-group="main">
+            <div class="dash-page-header">
+                <div class="dash-page-title">Analytics Overview</div>
+                <div class="dash-page-subtitle">Real-time operational metrics</div>
+            </div>
+
+            <div class="kpi-grid mb-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+                    <div class="kpi-value">284</div>
+                    <div class="kpi-label">Orders Today</div>
+                    <div class="kpi-delta up">▲ 14% vs yesterday</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                    <div class="kpi-value">6</div>
+                    <div class="kpi-label">Warehouses</div>
+                    <div class="kpi-delta up">▲ 2 this quarter</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+                    <div class="kpi-value">24</div>
+                    <div class="kpi-label">Active Items</div>
+                    <div class="kpi-delta up">▲ 3 new</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                    <div class="kpi-value">38</div>
+                    <div class="kpi-label">Active Drivers</div>
+                    <div class="kpi-delta up">▲ 5 this month</div>
+                </div>
+            </div>
+
+            <!-- Line chart: orders per day  -->
+            <div class="chart-wrap mb-4">
+                <div class="chart-header">
+                    <div class="chart-title">Order Volume — Last 7 Days</div>
+                    <div class="chart-legend"><div class="chart-legend-dot"></div> Orders</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-y-labels">
+                        <span>300</span><span>225</span><span>150</span><span>75</span><span>0</span>
+                    </div>
+                    <div class="line-chart">
+                        <div class="grid-lines">
+                            <div class="grid-line"></div><div class="grid-line"></div>
+                            <div class="grid-line"></div><div class="grid-line"></div>
+                            <div class="grid-line"></div>
+                        </div>
+                        <svg viewBox="0 0 700 180" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="chartGradB" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#F5C71B" stop-opacity="0.55"/>
+                                    <stop offset="100%" stop-color="#F5C71B" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <path class="chart-area" style="fill:url(#chartGradB)" d="M0,120 C58,100 116,140 175,80 C233,40 291,60 350,30 C408,10 466,45 525,25 C583,8 641,30 700,20 L700,180 L0,180 Z"/>
+                            <path class="chart-line" d="M0,120 C58,100 116,140 175,80 C233,40 291,60 350,30 C408,10 466,45 525,25 C583,8 641,30 700,20"/>
+                            <circle class="chart-dot" cx="0"   cy="120" r="4"/>
+                            <circle class="chart-dot" cx="116" cy="140" r="4"/>
+                            <circle class="chart-dot" cx="233" cy="40"  r="4"/>
+                            <circle class="chart-dot" cx="350" cy="30"  r="4"/>
+                            <circle class="chart-dot" cx="466" cy="45"  r="4"/>
+                            <circle class="chart-dot" cx="583" cy="8"   r="4"/>
+                            <circle class="chart-dot" cx="700" cy="20"  r="4"/>
+                        </svg>
+                    </div>
+                    <div class="chart-x-labels">
+                        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar chart: warehouse load -->
+            <div class="chart-wrap">
+                <div class="chart-header">
+                    <div class="chart-title">Warehouse Capacity Usage</div>
+                </div>
+                <div class="bar-chart-group">
+                    <div class="bar-wrap"><div class="bar" style="height:80%"></div><div class="bar-label">HN-1</div><div class="bar-val">80%</div></div>
+                    <div class="bar-wrap"><div class="bar" style="height:60%"></div><div class="bar-label">HN-2</div><div class="bar-val">60%</div></div>
+                    <div class="bar-wrap"><div class="bar" style="height:95%"></div><div class="bar-label">HCM-1</div><div class="bar-val">95%</div></div>
+                    <div class="bar-wrap"><div class="bar" style="height:45%"></div><div class="bar-label">HCM-2</div><div class="bar-val">45%</div></div>
+                    <div class="bar-wrap"><div class="bar" style="height:70%"></div><div class="bar-label">DN-1</div><div class="bar-val">70%</div></div>
+                    <div class="bar-wrap"><div class="bar" style="height:30%"></div><div class="bar-label">CT-1</div><div class="bar-val">30%</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════ TAB: WAREHOUSES ════ -->
+        <div class="dash-tab-panel" data-tab="warehouses" data-group="main">
+            <div class="dash-page-header">
+                <div class="dash-page-title">Warehouse Management</div>
+                <div class="dash-page-subtitle">Manage all storage locations</div>
+            </div>
+            <div class="toolbar">
+                <input class="toolbar-search" type="search" placeholder="Search warehouses..." />
+                <button class="btn-add" onclick="openModal('warehouseModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Warehouse
+                </button>
+            </div>
+
+            <!-- Warehouse as skin cards with rarity = capacity level -->
+            <div class="skin-grid">
+                @{
+                    var warehouses = new[] {
+                        new { Name="Hanoi Central",    Code="HN-1",  Cap="80%",  City="Hanoi",     Items=142, Rarity="orange" },
+                        new { Name="Hanoi North",      Code="HN-2",  Cap="60%",  City="Hanoi",     Items=98,  Rarity="blue"   },
+                        new { Name="HCM Main Hub",     Code="HCM-1", Cap="95%",  City="Ho Chi Minh",Items=210, Rarity="red"   },
+                        new { Name="HCM South",        Code="HCM-2", Cap="45%",  City="Ho Chi Minh",Items=67,  Rarity="green" },
+                        new { Name="Da Nang Port",     Code="DN-1",  Cap="70%",  City="Da Nang",    Items=113, Rarity="blue"  },
+                        new { Name="Can Tho Depot",    Code="CT-1",  Cap="30%",  City="Can Tho",    Items=44,  Rarity="green" },
+                    };
+                }
+                @foreach (var w in warehouses)
+                {
+                    <div class="skin-card" data-rarity="@w.Rarity">
+                        <div class="skin-card-img">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,199,27,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                            </svg>
+                        </div>
+                        <div class="skin-card-body">
+                            <div class="skin-card-name">@w.Name</div>
+                            <div class="skin-card-meta">@w.City · @w.Items items</div>
+                            <div class="skin-card-price">@w.Cap capacity</div>
+                        </div>
+                        <div class="skin-card-rarity"></div>
+                        <div class="skin-card-actions">
+                            <button class="btn-card-edit" onclick="openModal('warehouseModal',{name:'@w.Name',city:'@w.City',code:'@w.Code'})">Edit</button>
+                            <button class="btn-card-delete" onclick="confirmDelete('@w.Name', ()=>{this.closest('.skin-card').remove()})">Delete</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ════ TAB: ITEMS ════ -->
+        <div class="dash-tab-panel" data-tab="items" data-group="main">
+            <div class="dash-page-header">
+                <div class="dash-page-title">Item Inventory</div>
+                <div class="dash-page-subtitle">All items — export to create an order</div>
+            </div>
+            <div class="toolbar">
+                <input class="toolbar-search" type="search" placeholder="Search items..." oninput="filterCards(this,'#itemGrid')" />
+                <select class="filter-select">
+                    <option>All Types</option>
+                    <option>Express</option>
+                    <option>Standard</option>
+                    <option>Fragile</option>
+                    <option>Premium</option>
+                </select>
+                <button class="btn-add" onclick="openModal('itemModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Item
+                </button>
+            </div>
+
+            <div class="skin-grid" id="itemGrid">
+                @{
+                    var items = new[] {
+                        new { Name="Express Parcel",    Sku="EXP-001", Weight="2kg",   Price="45,000đ",  Rarity="red",    Icon="🚀" },
+                        new { Name="Standard Box",      Sku="STD-002", Weight="5kg",   Price="25,000đ",  Rarity="blue",   Icon="📦" },
+                        new { Name="Fragile Glass Set", Sku="FRG-003", Weight="1.5kg", Price="60,000đ",  Rarity="purple", Icon="💎" },
+                        new { Name="Cold Chain Bag",    Sku="CCH-004", Weight="3kg",   Price="80,000đ",  Rarity="yellow", Icon="❄" },
+                        new { Name="Document Folder",   Sku="DOC-005", Weight="0.2kg", Price="15,000đ",  Rarity="green",  Icon="📄" },
+                        new { Name="Heavy Machinery",   Sku="HVY-006", Weight="50kg",  Price="200,000đ", Rarity="orange", Icon="⚙" },
+                        new { Name="Overnight Pack",    Sku="ONP-007", Weight="2.5kg", Price="55,000đ",  Rarity="red",    Icon="🌙" },
+                        new { Name="Economy Pouch",     Sku="ECO-008", Weight="0.5kg", Price="12,000đ",  Rarity="green",  Icon="📮" },
+                    };
+                }
+                @foreach (var it in items)
+                {
+                    <div class="skin-card" data-rarity="@it.Rarity">
+                        <div class="skin-card-img" style="font-size:44px">@it.Icon</div>
+                        <div class="skin-card-body">
+                            <div class="skin-card-name">@it.Name</div>
+                            <div class="skin-card-meta">@it.Sku · @it.Weight</div>
+                            <div class="skin-card-price">@it.Price</div>
+                        </div>
+                        <div class="skin-card-rarity"></div>
+                        <div class="skin-card-actions">
+                            <button class="btn-card-edit" onclick="openModal('itemModal',{name:'@it.Name',sku:'@it.Sku',weight:'@it.Weight'})">Edit</button>
+                            <button class="btn-card-export" onclick="openModal('createOrderModal',{item:'@it.Name',sku:'@it.Sku'})">Export →Order</button>
+                            <button class="btn-card-delete" onclick="confirmDelete('@it.Name', ()=>{this.closest('.skin-card').remove()})">Del</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ════ TAB: EMPLOYEES ════ -->
+        <div class="dash-tab-panel" data-tab="employees" data-group="main">
+            <div class="dash-page-header">
+                <div class="dash-page-title">Employee Management</div>
+                <div class="dash-page-subtitle">Driver roster and availability</div>
+            </div>
+            <div class="toolbar">
+                <input class="toolbar-search" type="search" placeholder="Search employees..." oninput="filterTable(this,'#empTable')" />
+                <select class="filter-select">
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+                <button class="btn-add" onclick="openModal('employeeModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Driver
+                </button>
+            </div>
+
+            <div class="dash-table-wrap">
+                <table class="dash-table" id="empTable">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Driver</th><th>Phone</th><th>Zone</th>
+                            <th>Orders Today</th><th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var drivers = new[] {
+                                new { Id=1, Name="Tran Van Hung",   Phone="0901 111 222", Zone="Hanoi",     Orders=8,  Status="Active"   },
+                                new { Id=2, Name="Nguyen Minh Tuan",Phone="0912 333 444", Zone="HCM",       Orders=12, Status="Active"   },
+                                new { Id=3, Name="Le Thi Lan",      Phone="0923 555 666", Zone="Da Nang",   Orders=5,  Status="Active"   },
+                                new { Id=4, Name="Pham Van Duc",    Phone="0934 777 888", Zone="Hanoi",     Orders=0,  Status="Inactive" },
+                                new { Id=5, Name="Hoang Van Nam",   Phone="0945 999 000", Zone="Can Tho",   Orders=7,  Status="Active"   },
+                            };
+                        }
+                        @foreach (var d in drivers)
+                        {
+                            <tr>
+                                <td style="color:var(--text-subtle)">@d.Id</td>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        <div style="width:32px;height:32px;border-radius:50%;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;color:#60a5fa;font-weight:700;flex-shrink:0;">
+                                            @d.Name[0]
+                                        </div>
+                                        <span>@d.Name</span>
+                                    </div>
+                                </td>
+                                <td style="color:var(--text-muted)">@d.Phone</td>
+                                <td><span style="font-size:12px;font-weight:600;">@d.Zone</span></td>
+                                <td style="font-family:'Russo One',sans-serif;color:var(--yellow)">@d.Orders</td>
+                                <td><span class="badge @(d.Status == "Active" ? "badge-active" : "badge-inactive")">@d.Status</span></td>
+                                <td>
+                                    <div class="row-actions">
+                                        <button class="btn-row edit" onclick="openModal('employeeModal',{name:'@d.Name',phone:'@d.Phone',zone:'@d.Zone'})">Edit</button>
+                                        <button class="btn-row @(d.Status == "Active" ? "deactivate" : "edit")" onclick="toggleDeactivate(this,@d.Id)">
+                                            @(d.Status == "Active" ? "Deactivate" : "Activate")
+                                        </button>
+                                        <button class="btn-row delete" onclick="confirmDelete('@d.Name', ()=>{this.closest('tr').remove()})">Del</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ══ MODAL: Warehouse ══ -->
+<div class="modal-overlay" id="warehouseModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">Warehouse Details</div>
+            <button class="modal-close" onclick="closeModal('warehouseModal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="wh-name">Warehouse Name</label>
+            <input class="modal-input" id="wh-name" name="name" placeholder="Hanoi Central" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="wh-code">Code</label>
+            <input class="modal-input" id="wh-code" name="code" placeholder="HN-1" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="wh-city">City</label>
+            <select class="modal-select" id="wh-city" name="city">
+                <option>Hanoi</option><option>Ho Chi Minh</option><option>Da Nang</option><option>Can Tho</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="wh-cap">Capacity (m²)</label>
+            <input class="modal-input" id="wh-cap" name="capacity" type="number" placeholder="500" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-cancel" onclick="closeModal('warehouseModal')">Cancel</button>
+            <button class="btn-modal-save" onclick="closeModal('warehouseModal')">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: Item ══ -->
+<div class="modal-overlay" id="itemModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">Item Details</div>
+            <button class="modal-close" onclick="closeModal('itemModal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="it-name">Item Name</label>
+            <input class="modal-input" id="it-name" name="name" placeholder="Express Parcel" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="it-sku">SKU</label>
+            <input class="modal-input" id="it-sku" name="sku" placeholder="EXP-001" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="it-type">Type / Priority</label>
+            <select class="modal-select" id="it-type" name="type">
+                <option value="red">Express (Hỏa tốc)</option>
+                <option value="blue">Standard (Thường)</option>
+                <option value="purple">Fragile</option>
+                <option value="yellow">Premium</option>
+                <option value="green">Economy</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="it-weight">Weight (kg)</label>
+            <input class="modal-input" id="it-weight" name="weight" type="number" placeholder="2.5" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="it-price">Shipping Fee</label>
+            <input class="modal-input" id="it-price" name="price" placeholder="45,000đ" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-cancel" onclick="closeModal('itemModal')">Cancel</button>
+            <button class="btn-modal-save" onclick="closeModal('itemModal')">Save Item</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: Create Order from Item ══ -->
+<div class="modal-overlay" id="createOrderModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title" style="color:var(--yellow)">Create Order</div>
+            <button class="modal-close" onclick="closeModal('createOrderModal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div style="background:var(--yellow-dim);border:1px solid rgba(245,199,27,0.25);border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:13px;color:var(--yellow)">
+            Exporting item: <strong id="co-item">—</strong>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="co-from">From (Warehouse)</label>
+            <select class="modal-select" id="co-from">
+                <option>HN-1 — Hanoi Central</option>
+                <option>HCM-1 — HCM Main Hub</option>
+                <option>DN-1 — Da Nang Port</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="co-to">Recipient Address</label>
+            <input class="modal-input" id="co-to" placeholder="123 Nguyen Van Linh, HCM" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="co-driver">Assign Driver</label>
+            <select class="modal-select" id="co-driver">
+                <option>Tran Van Hung (HN)</option>
+                <option>Nguyen Minh Tuan (HCM)</option>
+                <option>Le Thi Lan (DN)</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="co-qty">Quantity</label>
+            <input class="modal-input" id="co-qty" type="number" value="1" min="1" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-cancel" onclick="closeModal('createOrderModal')">Cancel</button>
+            <button class="btn-modal-save" onclick="closeModal('createOrderModal')">Create Order</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: Employee ══ -->
+<div class="modal-overlay" id="employeeModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">Driver Details</div>
+            <button class="modal-close" onclick="closeModal('employeeModal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="emp-name">Full Name</label>
+            <input class="modal-input" id="emp-name" name="name" placeholder="Tran Van Hung" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="emp-phone">Phone</label>
+            <input class="modal-input" id="emp-phone" name="phone" placeholder="0901 234 567" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="emp-zone">Delivery Zone</label>
+            <select class="modal-select" id="emp-zone" name="zone">
+                <option>Hanoi</option><option>Ho Chi Minh</option><option>Da Nang</option><option>Can Tho</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="emp-license">License Plate</label>
+            <input class="modal-input" id="emp-license" placeholder="30A-12345" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-cancel" onclick="closeModal('employeeModal')">Cancel</button>
+            <button class="btn-modal-save" onclick="closeModal('employeeModal')">Save Driver</button>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/dashboard.js"></script>
+<script>
+    // Populate create order modal with item name
+    const _origOpen = window.openModal;
+    window.openModal = function(id, data={}) {
+        _origOpen(id, data);
+        if (id === 'createOrderModal' && data.item) {
+            document.getElementById('co-item').textContent = data.item + ' (' + (data.sku||'') + ')';
+        }
+    };
+</script>
+</body>
+</html>

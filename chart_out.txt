@@ -1,0 +1,34 @@
+﻿## UI Pro Max Search Results
+**Domain:** chart | **Query:** line chart dashboard analytics dark
+**Source:** charts.csv | **Found:** 3 results
+
+### Result 1
+- **Data Type:** Trend Over Time
+- **Keywords:** trend, time-series, line, growth, timeline, progress
+- **Best Chart Type:** Line Chart
+- **Secondary Options:** Area Chart, Smooth Area
+- **Color Guidance:** Primary: #0080FF. Multiple series: use distinct colors. Fill: 20% opacity
+- **Accessibility Notes:** ✓ Clear line patterns for colorblind users. Add pattern overlays.
+- **Library Recommendation:** Chart.js, Recharts, ApexCharts
+- **Interactive Level:** Hover + Zoom
+
+### Result 2
+- **Data Type:** Anomaly Detection
+- **Keywords:** anomaly-detection
+- **Best Chart Type:** Line Chart with Highlights
+- **Secondary Options:** Scatter with Alert
+- **Color Guidance:** Normal: blue #0080FF. Anomaly: red #FF0000 circle/square marker + alert
+- **Accessibility Notes:** ✓ Circle/marker for anomalies. Add text alert annotation.
+- **Library Recommendation:** D3.js, Plotly, ApexCharts
+- **Interactive Level:** Hover + Alert
+
+### Result 3
+- **Data Type:** Time-Series Forecast
+- **Keywords:** time-series-forecast
+- **Best Chart Type:** Line with Confidence Band
+- **Secondary Options:** Ribbon Chart
+- **Color Guidance:** Actual: solid line #0080FF. Forecast: dashed #FF9500. Band: light shading
+- **Accessibility Notes:** ✓ Clearly distinguish actual vs forecast. Add legend.
+- **Library Recommendation:** Chart.js, ApexCharts, Plotly
+- **Interactive Level:** Hover + Toggle
+

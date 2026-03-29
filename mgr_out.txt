@@ -1,0 +1,107 @@
+﻿@page
+@model Client_Frontend.Pages.ManagerHomeModel
+@{
+    ViewData["Title"] = "Manager Home";
+}
+<link rel="stylesheet" href="~/css/auth.css" />
+
+<header class="app-navbar">
+    <div class="brand">
+        <div class="mark">SM</div>
+        <div>
+            <div style="font-weight:800">SkinsMonkey</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.6)">Manager Dashboard</div>
+        </div>
+    </div>
+
+    <div class="nav-items">
+        <a href="#">Trao ??i Skin</a>
+        <a href="#">Qu� t?ng mi?n ph�</a>
+        <a href="#">Trung t�m tr? gi�p</a>
+    </div>
+
+    <div class="right-controls">
+        <div style="color:var(--brand-yellow);font-weight:700">$ 5 Mi?n ph�</div>
+        <div style="width:44px;height:34px;border-radius:8px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center">??</div>
+        <div style="width:44px;height:34px;border-radius:8px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center">$</div>
+    </div>
+</header>
+
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <div class="tab">Overview</div>
+        <div class="tab">Inventory</div>
+        <div class="tab">Orders</div>
+        <div class="tab">Deliveries</div>
+        <div class="tab">Affiliates</div>
+        <div class="tab">Settings</div>
+    </aside>
+
+    <main class="app-main">
+        <div class="app-grid">
+            <section class="card">
+                <h3>Warehouses</h3>
+                <div class="list-item">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <strong>North Warehouse</strong>
+                            <div><small>Address: 123 North St</small></div>
+                        </div>
+                        <div><small>Stock: 1,240</small></div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <strong>Central Warehouse</strong>
+                            <div><small>Address: 10 Central Ave</small></div>
+                        </div>
+                        <div><small>Stock: 3,520</small></div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <strong>South Warehouse</strong>
+                            <div><small>Address: 78 South Rd</small></div>
+                        </div>
+                        <div><small>Stock: 860</small></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3>Employees</h3>
+                <div class="list-item">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <strong>Jane Doe</strong>
+                            <div><small>Role: Worker</small></div>
+                        </div>
+                        <div><small>Assigned: Central</small></div>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <strong>John Smith</strong>
+                            <div><small>Role: Worker</small></div>
+                        </div>
+                        <div><small>Assigned: North</small></div>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <strong>Mai Tran</strong>
+                            <div><small>Role: Worker</small></div>
+                        </div>
+                        <div><small>Assigned: South</small></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
