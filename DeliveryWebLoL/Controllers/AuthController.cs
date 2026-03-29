@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using DeliveryWebLoL.Service.Interfaces;
 using DeliveryWebLoL.Models;
 using DeliveryWebLoL.DTO.Auth;
 using DeliveryWebLoL.Service;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace DeliveryWebLoL.Controllers
 {
@@ -52,8 +50,8 @@ namespace DeliveryWebLoL.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] AuthRequest.RegisterRequest req)
         {
-            //1. Validate input - all fields must be present and non-empty, role must be valid
-            if (req == null || string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password) || string.IsNullOrEmpty(req.PhoneNum) || req.Role == 0) { 
+            if (req == null || string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password) || string.IsNullOrEmpty(req.PhoneNum) || req.Role == 0)
+            {
                 return Ok(new AuthResponse.RegisterResponse
                 {
                     Message = "All Credential must be filled - failed at 1st phase.",
@@ -61,7 +59,6 @@ namespace DeliveryWebLoL.Controllers
                 });
             }
 
-            //2. Check username uniqueness
             var existing = await _userService.GetByUsernameAsync(req.Username);
             if (existing != null)
                 return Ok(new AuthResponse.RegisterResponse
@@ -70,16 +67,12 @@ namespace DeliveryWebLoL.Controllers
                     Status = false
                 });
 
-            // Map role (fallback to Affiliate if invalid)
-            var role = Enum.IsDefined(typeof(UserRole), req.Role) ? (UserRole)req.Role : UserRole.Affiliate;
-
             var created = await _userService.RegisterAsync(req.Username, req.Password, req.PhoneNum, req.Email, req.Role);
 
             if (created == null)
             {
-                // creation failed (likely username, phone or email already exists)
                 return Ok(new AuthResponse.RegisterResponse
-                { 
+                {
                     Message = "Username, phone number or email already in use - failed at Creation phase.",
                     Status = false
                 });
@@ -87,8 +80,8 @@ namespace DeliveryWebLoL.Controllers
 
             return Ok(new AuthResponse.RegisterResponse
             {
-               Message = "Registration successful",
-               Status = true
+                Message = "Registration successful",
+                Status = true
             });
         }
 
@@ -123,8 +116,6 @@ namespace DeliveryWebLoL.Controllers
             });
         }
 
-        
-
         [HttpPost("set-role")]
         public async Task<IActionResult> SetRole([FromBody] AuthRequest.SetRoleRequest req)
         {
@@ -141,6 +132,18 @@ namespace DeliveryWebLoL.Controllers
             if (!ok) return StatusCode(500, "Failed to update role.");
 
             return Ok(new { message = "Role updated", role = newRole.ToString() });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] AuthRequest.LogoutRequest req)
+        {
+            if (req == null || string.IsNullOrWhiteSpace(req.Username)) return BadRequest();
+
+            var user = await _userService.GetByUsernameAsync(req.Username);
+            if (user == null) return NotFound();
+
+            await _userService.LogoutAsync(user);
+            return Ok(new { message = "Logged out" });
         }
     }
 }

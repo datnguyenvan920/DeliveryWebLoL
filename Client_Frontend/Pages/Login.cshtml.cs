@@ -41,11 +41,13 @@ namespace Client_Frontend.Pages
                 return Page();
             }
 
-            // Read response JSON and check for role == NewUser (enum value 4)
+            // Read content ONCE to avoid ObjectDisposedException (stream already consumed)
+            var body = await resp.Content.ReadAsStringAsync();
+
+            // Read response JSON and route based on role
             try
             {
-                using var stream = await resp.Content.ReadAsStreamAsync();
-                var doc = await JsonDocument.ParseAsync(stream);
+                using var doc = JsonDocument.Parse(body);
 
                 int roleValue = -1;
                 string? usernameFromResp = null;
@@ -60,6 +62,12 @@ namespace Client_Frontend.Pages
                     usernameFromResp = unameEl.GetString();
                 }
 
+                // Manager enum value is 1
+                if (roleValue == 1)
+                {
+                    return RedirectToPage("/ManagerHome");
+                }
+
                 // NewUser enum value is 4 in the shared API
                 if (roleValue == 4)
                 {
@@ -70,12 +78,10 @@ namespace Client_Frontend.Pages
             }
             catch
             {
-                // If parsing fails, continue and show success message
+                // ignore parsing errors
             }
 
-            var json = await resp.Content.ReadFromJsonAsync<object>();
             Message = "Login successful (server-side).";
-            // Optionally persist tokens from json here (session/cookie) as needed.
             return Page();
         }
     }
