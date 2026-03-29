@@ -1,0 +1,100 @@
+/* Auth pages theme: black, yellow, white */
+:root{
+    --brand-black:#0b0b0b;
+    --brand-dark:#151313;
+    --brand-yellow:#ffcc00;
+    --brand-muted:#2b2b2b;
+    --input-bg:#222;
+    --muted-text: rgba(255,255,255,0.7);
+}
+
+body.auth-page{
+    background: linear-gradient(180deg, #0f0f0f 0%, #141313 100%);
+    color: #fff;
+    min-height:100vh;
+}
+
+.auth-card{
+    background: linear-gradient(180deg, var(--brand-dark), rgba(0,0,0,0.6));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius:12px;
+    padding:28px;
+    max-width:420px;
+    margin:40px auto;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+.auth-logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+}
+.auth-logo .mark{
+    width:48px;height:48px;border-radius:8px;background:var(--brand-yellow);display:flex;align-items:center;justify-content:center;color:#111;font-weight:700;font-size:22px;
+}
+.auth-title{font-size:20px;font-weight:700;color:#fff}
+.auth-sub{color:rgba(255,255,255,0.75);font-size:13px;margin-bottom:14px}
+
+.form-control.auth-input{
+    background:var(--input-bg);
+    border:1px solid rgba(255,255,255,0.06);
+    color:#fff;
+    padding:10px 12px;border-radius:8px;
+}
+.form-control.auth-input::placeholder{color:rgba(255,255,255,0.45)}
+
+.btn-yellow{
+    background:var(--brand-yellow);
+    color:#111;border:none;padding:10px 14px;border-radius:8px;font-weight:700;
+}
+.btn-outline-light-custom{
+    background:transparent;border:1px solid rgba(255,255,255,0.08);color:#fff;padding:8px 12px;border-radius:8px;
+}
+
+.helper-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.helper-row a{color:var(--brand-yellow);text-decoration:none}
+
+.or-sep{display:flex;align-items:center;gap:10px;margin:18px 0}
+.or-sep div{flex:1;height:1px;background:rgba(255,255,255,0.04)}
+.or-sep span{color:rgba(255,255,255,0.55);font-size:13px}
+
+/* Choose role cards */
+.role-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:12px}
+@media(min-width:640px){.role-grid{grid-template-columns:repeat(3,1fr)}}
+.role-card{background:var(--brand-muted);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;flex-direction:column;gap:8px}
+.role-card input{display:none}
+.role-card .role-name{font-weight:700}
+.role-card .role-desc{font-size:13px;color:rgba(255,255,255,0.7)}
+.role-card.selected{border-color:var(--brand-yellow);box-shadow:0 6px 18px rgba(255,204,0,0.08)}
+
+/* small tweaks */
+.container-auth{padding-top:48px;padding-bottom:48px}
+.footer-note{font-size:12px;color:rgba(255,255,255,0.45);margin-top:12px}
+
+/* Manager page / app shell styles */
+.app-navbar{
+    background:var(--brand-dark);border-bottom:1px solid rgba(255,255,255,0.03);padding:12px 20px;display:flex;align-items:center;gap:20px;justify-content:space-between;color:#fff;
+}
+.app-navbar .brand{display:flex;align-items:center;gap:12px}
+.app-navbar .brand .mark{width:40px;height:40px;border-radius:8px;background:var(--brand-yellow);display:flex;align-items:center;justify-content:center;color:#111;font-weight:800}
+.app-navbar .nav-items{display:flex;gap:18px;align-items:center;color:var(--muted-text)}
+.app-navbar .nav-items a{color:var(--muted-text);text-decoration:none;font-weight:600}
+.app-navbar .right-controls{display:flex;gap:12px;align-items:center}
+
+.app-shell{display:flex;min-height:calc(100vh - 64px)}
+.app-sidebar{width:220px;background:var(--brand-dark);border-right:1px solid rgba(255,255,255,0.03);padding:18px}
+.app-sidebar .tab{padding:10px;border-radius:8px;color:var(--muted-text);margin-bottom:8px;cursor:pointer}
+.app-sidebar .tab:hover{background:rgba(255,255,255,0.02);color:#fff}
+
+.app-main{flex:1;padding:24px;background:linear-gradient(180deg,#0f0f0f,#111);color:#fff}
+.app-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:var(--brand-muted);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+.card h3{margin-top:0;color:#fff}
+.list-item{padding:10px;border-radius:8px;background:rgba(0,0,0,0.15);margin-bottom:8px}
+.list-item small{color:rgba(255,255,255,0.6)}
+
+@media(max-width:900px){
+    .app-sidebar{display:none}
+    .app-grid{grid-template-columns:1fr}
+}

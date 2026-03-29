@@ -1,0 +1,44 @@
+﻿@page
+@model Client_Frontend.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+<link rel="stylesheet" href="~/css/auth.css" />
+<body class="auth-page">
+    <div class="container-auth">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="mark">SM</div>
+                <div>
+                    <div class="auth-title">Create account</div>
+                    <div class="auth-sub">Register a new DeliveryWebLoL account</div>
+                </div>
+            </div>
+
+            <form method="post" asp-page-handler="ServerRegister">
+                <div class="mb-2">
+                    <input asp-for="Input.Username" class="form-control auth-input" placeholder="Username" />
+                </div>
+                <div class="mb-2">
+                    <input asp-for="Input.Password" class="form-control auth-input" placeholder="Password" type="password" />
+                </div>
+                <div class="mb-2">
+                    <input asp-for="Input.PhoneNum" class="form-control auth-input" placeholder="Phone number" />
+                </div>
+                <div class="mb-2">
+                    <input asp-for="Input.Email" class="form-control auth-input" placeholder="Email (optional)" />
+                </div>
+                <div class="helper-row">
+                    <div></div>
+                    <button type="submit" class="btn-yellow">Register</button>
+                </div>
+            </form>
+
+            <div style="margin-top:12px;color:rgba(255,255,255,0.7)">Already have an account? <a style="color:var(--brand-yellow);text-decoration:none" href="/Login">Sign in</a></div>
+
+            <div id="regResult" style="margin-top:12px;color:green">@Model.Message</div>
+        </div>
+    </div>
+
+    <script src="~/js/auth.js"></script>
+</body>

@@ -1,0 +1,67 @@
+﻿@page
+@model Client_Frontend.Pages.ChooseRoleModel
+@{
+    ViewData["Title"] = "Choose Role";
+}
+<link rel="stylesheet" href="~/css/auth.css" />
+<body class="auth-page">
+    <div class="container-auth">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="mark">SM</div>
+                <div>
+                    <div class="auth-title">Choose your role</div>
+                    <div class="auth-sub">Select the role that best describes you</div>
+                </div>
+            </div>
+
+            <form method="post">
+                <div class="role-grid">
+                    <label class="role-card" id="card-owner">
+                        <input type="radio" name="SelectedRole" value="1" />
+                        <div class="role-name">Warehouse owner/manager</div>
+                        <div class="role-desc">Can manage inventory and approve orders</div>
+                    </label>
+
+                    <label class="role-card" id="card-worker">
+                        <input type="radio" name="SelectedRole" value="3" />
+                        <div class="role-name">Worker</div>
+                        <div class="role-desc">Operational worker for handling pickups/deliveries</div>
+                    </label>
+
+                    <label class="role-card" id="card-aff">
+                        <input type="radio" name="SelectedRole" value="2" />
+                        <div class="role-name">Affiliate</div>
+                        <div class="role-desc">Affiliate who can request stock from warehouses</div>
+                    </label>
+                </div>
+
+                <div style="margin-top:12px">
+                    <input asp-for="Extra" class="form-control auth-input" placeholder="Affiliation invite or extra info (required)" />
+                </div>
+
+                <div class="helper-row" style="margin-top:14px">
+                    <div></div>
+                    <button type="submit" class="btn-yellow">Save role</button>
+                </div>
+            </form>
+
+            <div class="footer-note">You can change your role later from account settings</div>
+
+            <div style="margin-top:12px;color:green">@Model.Message</div>
+        </div>
+    </div>
+
+    <script>
+        // role card selection visual
+        document.addEventListener('DOMContentLoaded', function(){
+            const cards = document.querySelectorAll('.role-card');
+            cards.forEach(c => c.addEventListener('click', function(e){
+                cards.forEach(x=>x.classList.remove('selected'));
+                this.classList.add('selected');
+                const input = this.querySelector('input[type=radio]');
+                if(input) input.checked = true;
+            }));
+        });
+    </script>
+</body>

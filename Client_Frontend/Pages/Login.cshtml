@@ -1,0 +1,47 @@
+﻿@page
+@model Client_Frontend.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+<link rel="stylesheet" href="~/css/auth.css" />
+<body class="auth-page">
+    <div class="container-auth">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="mark">SM</div>
+                <div>
+                    <div class="auth-title">DeliveryWebLoL</div>
+                    <div class="auth-sub">Sign in to your account</div>
+                </div>
+            </div>
+
+            <form method="post" asp-page-handler="ServerLogin">
+                <div class="mb-2">
+                    <input asp-for="Input.Username" class="form-control auth-input" placeholder="Username" />
+                </div>
+                <div class="mb-2">
+                    <input asp-for="Input.Password" class="form-control auth-input" placeholder="Password" type="password" />
+                </div>
+                <div class="helper-row">
+                    <div></div>
+                    <button type="submit" class="btn-yellow">Sign in</button>
+                </div>
+            </form>
+
+            <div class="or-sep">
+                <div></div>
+                <span>or</span>
+                <div></div>
+            </div>
+
+            <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px">
+                <a class="btn-outline-light-custom" href="/Register">Register</a>
+                <button class="btn-outline-light-custom" id="ajaxLoginBtn">AJAX Sign in</button>
+            </div>
+
+            <div id="result" style="margin-top:12px;color:green">@Model.Message</div>
+        </div>
+    </div>
+
+    <script src="~/js/auth.js"></script>
+</body>
