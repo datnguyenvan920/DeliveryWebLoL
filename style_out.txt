@@ -1,0 +1,52 @@
+﻿## UI Pro Max Search Results
+**Domain:** style | **Query:** glassmorphism dark gaming neon
+**Source:** styles.csv | **Found:** 3 results
+
+### Result 1
+- **Style Category:** Cyberpunk UI
+- **Type:** General
+- **Keywords:** Neon, dark mode, terminal, HUD, sci-fi, glitch, dystopian, futuristic, matrix, tech noir
+- **Primary Colors:** #00FF00 (Matrix Green), #FF00FF (Magenta), #00FFFF (Cyan), #0D0D0D (Dark)
+- **Effects & Animation:** Neon glow (text-shadow), glitch animations (skew/offset), scanlines (::before overlay), terminal fonts
+- **Best For:** Gaming platforms, tech products, crypto apps, sci-fi applications, developer tools, entertainment
+- **Performance:** ⚠ Moderate
+- **Accessibility:** ⚠ Limited (dark+neon)
+- **Framework Compatibility:** Tailwind 8/10, Custom CSS 10/10
+- **Complexity:** Medium
+- **AI Prompt Keywords:** Design a cyberpunk interface. Use: neon colors on dark (#0D0D0D), terminal/HUD aesthetic, glitch effects, scanlines overlay, matrix green accents, monospace fonts, angular shapes, dystopian tech feel.
+- **CSS/Technical Keywords:** background: #0D0D0D, color: #00FF00 or #FF00FF, font-family: monospace, text-shadow: 0 0 10px neon, animation: glitch (transform skew), ::before scanlines (repeating-linear-gradient)
+- **Implementation Checklist:** ☐ Dark background only, ☐ Neon accents visible, ☐ Glitch effect subtle, ☐ Scanlines optional, ☐ Monospace font, ☐ Terminal aesthetic
+- **Design System Variables:** --bg-dark: #0D0D0D, --neon-green: #00FF00, --neon-magenta: #FF00FF, --neon-cyan: #00FFFF, --scanline-opacity: 0.1, --glitch-duration: 0.3s
+
+### Result 2
+- **Style Category:** Dark Mode (OLED)
+- **Type:** General
+- **Keywords:** Dark theme, low light, high contrast, deep black, midnight blue, eye-friendly, OLED, night mode, power efficient
+- **Primary Colors:** Deep Black #000000, Dark Grey #121212, Midnight Blue #0A0E27
+- **Effects & Animation:** Minimal glow (text-shadow: 0 0 10px), dark-to-light transitions, low white emission, high readability, visible focus
+- **Best For:** Night-mode apps, coding platforms, entertainment, eye-strain prevention, OLED devices, low-light
+- **Performance:** ⚡ Excellent
+- **Accessibility:** ✓ WCAG AAA
+- **Framework Compatibility:** Tailwind 10/10, MUI 10/10, Chakra 10/10
+- **Complexity:** Low
+- **AI Prompt Keywords:** Create an OLED-optimized dark interface with deep black (#000000), dark grey (#121212), midnight blue accents. Use minimal glow effects, vibrant neon accents (green, blue, gold, purple), high contrast text. Optimize for eye comfort and OLED power saving.
+- **CSS/Technical Keywords:** background: #000000 or #121212, color: #FFFFFF or #E0E0E0, text-shadow: 0 0 10px neon-color (sparingly), filter: brightness(0.8) if needed, color-scheme: dark
+- **Implementation Checklist:** ☐ Deep black #000000 or #121212, ☐ Vibrant neon accents used, ☐ Text contrast 7:1+, ☐ Minimal glow effects, ☐ OLED power optimization, ☐ No white (#FFFFFF) background
+- **Design System Variables:** --bg-black: #000000, --bg-dark-grey: #121212, --text-primary: #FFFFFF, --accent-neon: neon colors, --glow-effect: minimal, --oled-optimized: true
+
+### Result 3
+- **Style Category:** Retro-Futurism
+- **Type:** General
+- **Keywords:** Vintage sci-fi, 80s aesthetic, neon glow, geometric patterns, CRT scanlines, pixel art, cyberpunk, synthwave
+- **Primary Colors:** Neon Blue #0080FF, Hot Pink #FF006E, Cyan #00FFFF, Deep Black #1A1A2E, Purple #5D34D0
+- **Effects & Animation:** CRT scanlines (::before overlay), neon glow (text-shadow+box-shadow), glitch effects (skew/offset keyframes)
+- **Best For:** Gaming, entertainment, music platforms, tech brands, artistic projects, nostalgic, cyberpunk
+- **Performance:** ⚠ Moderate
+- **Accessibility:** ⚠ High contrast/strain
+- **Framework Compatibility:** Tailwind 8/10, CSS-in-JS 9/10
+- **Complexity:** Medium
+- **AI Prompt Keywords:** Build a retro-futuristic (cyberpunk/vaporwave) interface with neon colors (blue, pink, cyan), deep black background, 80s aesthetic, CRT scanlines, glitch effects, neon glow text/borders, monospace fonts, geometric patterns. Use neon text-shadow and animated glitch effects.
+- **CSS/Technical Keywords:** color: neon colors (#0080FF, #FF006E, #00FFFF), text-shadow: 0 0 10px neon, background: #000 or #1A1A2E, font-family: monospace, animation: glitch (skew+offset), filter: hue-rotate
+- **Implementation Checklist:** ☐ Neon colors used, ☐ CRT scanlines effect, ☐ Glitch animations active, ☐ Monospace font, ☐ Deep black background, ☐ Glow effects applied, ☐ 80s patterns present
+- **Design System Variables:** --neon-colors: #0080FF #FF006E #00FFFF, --background: #000000, --font-family: monospace, --effect: glitch+glow, --scanline-opacity: 0.3, --crt-effect: true
+

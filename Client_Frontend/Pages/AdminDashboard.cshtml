@@ -1,0 +1,406 @@
+@page
+@model Client_Frontend.Pages.AdminDashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard — DeliveryWebLoL";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Admin Dashboard — manage users and view platform reports." />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/css/auth.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+</head>
+<body class="dash-page">
+
+<!-- ── Navbar ─────────────────────────────────────────── -->
+<nav class="dash-navbar">
+    <button class="dash-hamburger" id="sidebarToggle" aria-label="Toggle sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
+    <div class="dash-brand">
+        <div class="mark">DW</div>
+        <span class="brand-name">DeliveryWebLoL</span>
+    </div>
+    <div class="dash-navbar-right">
+        <span class="dash-role-badge">Admin</span>
+        <button class="dash-icon-btn" title="Notifications">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+        </button>
+        <a class="dash-icon-btn" href="/Login" title="Sign out">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        </a>
+        <div class="dash-avatar" title="Admin">A</div>
+    </div>
+</nav>
+
+<!-- ── Shell ──────────────────────────────────────────── -->
+<div class="dash-shell">
+
+    <!-- Sidebar -->
+    <aside class="dash-sidebar">
+        <div class="sidebar-section-label">Management</div>
+        <div class="sidebar-item active" data-tab="users" data-group="main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            User List
+        </div>
+        <div class="sidebar-section-label">Analytics</div>
+        <div class="sidebar-item" data-tab="reports" data-group="main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            Reports
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="dash-main">
+
+        <!-- Tabs -->
+        <div class="dash-tabs" data-group="main">
+            <div class="dash-tab active" data-tab="users" data-group="main">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                </svg>
+                User List
+            </div>
+            <div class="dash-tab" data-tab="reports" data-group="main">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                Reports
+            </div>
+        </div>
+
+        <!-- ════ TAB: USERS ════ -->
+        <div class="dash-tab-panel active" data-tab="users" data-group="main">
+            <div class="dash-page-header">
+                <div class="dash-page-title">User Management</div>
+                <div class="dash-page-subtitle">Create, edit, view and deactivate platform users</div>
+            </div>
+
+            <!-- KPI row -->
+            <div class="kpi-grid mb-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value">248</div>
+                    <div class="kpi-label">Total Users</div>
+                    <div class="kpi-delta up">▲ 12 this week</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value">231</div>
+                    <div class="kpi-label">Active</div>
+                    <div class="kpi-delta up">▲ 93.1%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:rgba(255,77,106,0.12);color:#FF4D6A">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value">17</div>
+                    <div class="kpi-label">Inactive</div>
+                    <div class="kpi-delta down">▼ 6.9%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="kpi-value">38</div>
+                    <div class="kpi-label">Drivers</div>
+                    <div class="kpi-delta up">▲ 5 this month</div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <input class="toolbar-search" type="search" placeholder="Search users..."
+                       oninput="filterTable(this, '#userTable')" />
+                <select class="filter-select" onchange="filterTable(this, '#userTable')">
+                    <option value="">All Roles</option>
+                    <option>Admin</option>
+                    <option>Manager</option>
+                    <option>Driver</option>
+                    <option>Customer</option>
+                </select>
+                <button class="btn-add" onclick="openModal('userModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add User
+                </button>
+            </div>
+
+            <!-- User table -->
+            <div class="dash-table-wrap">
+                <table class="dash-table" id="userTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var users = new[] {
+                                new { Id=1, Name="Nguyen Van A", Email="vana@mail.com", Role="Admin",    Status="Active",   Joined="2024-01-10" },
+                                new { Id=2, Name="Tran Thi B",   Email="thib@mail.com", Role="Manager",  Status="Active",   Joined="2024-02-14" },
+                                new { Id=3, Name="Le Van C",     Email="vanc@mail.com", Role="Driver",   Status="Active",   Joined="2024-03-05" },
+                                new { Id=4, Name="Pham Thi D",   Email="thid@mail.com", Role="Customer", Status="Inactive", Joined="2024-03-20" },
+                                new { Id=5, Name="Hoang Van E",  Email="vane@mail.com", Role="Driver",   Status="Active",   Joined="2024-04-01" },
+                                new { Id=6, Name="Nguyen Thi F", Email="thif@mail.com", Role="Customer", Status="Active",   Joined="2024-04-15" },
+                                new { Id=7, Name="Do Van G",     Email="vang@mail.com", Role="Driver",   Status="Inactive", Joined="2024-05-02" },
+                                new { Id=8, Name="Vu Thi H",     Email="thih@mail.com", Role="Manager",  Status="Active",   Joined="2024-05-18" },
+                            };
+                        }
+                        @foreach (var u in users)
+                        {
+                            <tr>
+                                <td style="color:var(--text-subtle)">@u.Id</td>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        <div style="width:32px;height:32px;border-radius:50%;background:var(--yellow-dim);border:1px solid rgba(245,199,27,0.25);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--yellow);font-weight:700;flex-shrink:0;">
+                                            @u.Name[0]
+                                        </div>
+                                        <span>@u.Name</span>
+                                    </div>
+                                </td>
+                                <td style="color:var(--text-muted)">@u.Email</td>
+                                <td><span style="font-size:12px;font-weight:600;">@u.Role</span></td>
+                                <td>
+                                    <span class="badge @(u.Status == "Active" ? "badge-active" : "badge-inactive")">@u.Status</span>
+                                </td>
+                                <td style="color:var(--text-muted)">@u.Joined</td>
+                                <td>
+                                    <div class="row-actions">
+                                        <button class="btn-row view"
+                                                onclick="openModal('userDetailModal',{name:'@u.Name',email:'@u.Email',role:'@u.Role'})">
+                                            View
+                                        </button>
+                                        <button class="btn-row edit"
+                                                onclick="openModal('userModal',{name:'@u.Name',email:'@u.Email',role:'@u.Role'})">
+                                            Edit
+                                        </button>
+                                        <button class="btn-row @(u.Status == "Active" ? "deactivate" : "edit")"
+                                                onclick="toggleDeactivate(this, @u.Id)">
+                                            @(u.Status == "Active" ? "Deactivate" : "Activate")
+                                        </button>
+                                        <button class="btn-row delete"
+                                                onclick="confirmDelete('@u.Name', ()=>{this.closest('tr').remove()})">
+                                            Del
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div><!-- /users panel -->
+
+        <!-- ════ TAB: REPORTS ════ -->
+        <div class="dash-tab-panel" data-tab="reports" data-group="main">
+            <div class="dash-page-header">
+                <div class="dash-page-title">Platform Reports</div>
+                <div class="dash-page-subtitle">Overview of deliveries, revenue and user activity</div>
+            </div>
+
+            <!-- Report KPIs -->
+            <div class="kpi-grid mb-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+                    <div class="kpi-value">1,482</div>
+                    <div class="kpi-label">Total Orders</div>
+                    <div class="kpi-delta up">▲ 8.4% vs last month</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                    <div class="kpi-value">84.2M</div>
+                    <div class="kpi-label">Revenue (VND)</div>
+                    <div class="kpi-delta up">▲ 12.1%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="kpi-value">96.3%</div>
+                    <div class="kpi-label">Delivery Rate</div>
+                    <div class="kpi-delta up">▲ 1.2%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:rgba(255,77,106,0.12);color:#FF4D6A"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                    <div class="kpi-value">57</div>
+                    <div class="kpi-label">Failed Orders</div>
+                    <div class="kpi-delta down">▼ 3.7%</div>
+                </div>
+            </div>
+
+            <!-- Line chart: Orders over time -->
+            <div class="chart-wrap mb-4">
+                <div class="chart-header">
+                    <div class="chart-title">Orders — Last 7 Days</div>
+                    <div class="chart-legend"><div class="chart-legend-dot"></div> Orders</div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-y-labels">
+                        <span>220</span><span>160</span><span>100</span><span>40</span><span>0</span>
+                    </div>
+                    <div class="line-chart">
+                        <div class="grid-lines">
+                            <div class="grid-line"></div><div class="grid-line"></div>
+                            <div class="grid-line"></div><div class="grid-line"></div>
+                            <div class="grid-line"></div>
+                        </div>
+                        <svg viewBox="0 0 700 180" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#F5C71B" stop-opacity="0.6"/>
+                                    <stop offset="100%" stop-color="#F5C71B" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Area fill -->
+                            <path class="chart-area" d="M0,140 C58,130 116,110 175,90 C233,70 291,80 350,60 C408,40 466,50 525,30 C583,10 641,20 700,15 L700,180 L0,180 Z"/>
+                            <!-- Line -->
+                            <path class="chart-line" d="M0,140 C58,130 116,110 175,90 C233,70 291,80 350,60 C408,40 466,50 525,30 C583,10 641,20 700,15"/>
+                            <!-- Dots -->
+                            <circle class="chart-dot" cx="0"   cy="140" r="4"/>
+                            <circle class="chart-dot" cx="116" cy="110" r="4"/>
+                            <circle class="chart-dot" cx="233" cy="70"  r="4"/>
+                            <circle class="chart-dot" cx="350" cy="60"  r="4"/>
+                            <circle class="chart-dot" cx="466" cy="50"  r="4"/>
+                            <circle class="chart-dot" cx="583" cy="10"  r="4"/>
+                            <circle class="chart-dot" cx="700" cy="15"  r="4"/>
+                        </svg>
+                    </div>
+                    <div class="chart-x-labels">
+                        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown table -->
+            <div class="dash-table-wrap">
+                <table class="dash-table">
+                    <thead>
+                        <tr><th>Date</th><th>Orders</th><th>Revenue (VND)</th><th>Delivered</th><th>Failed</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Mon 24/3</td><td>187</td><td>10,450,000</td><td><span class="badge badge-delivered">181</span></td><td><span class="badge badge-cancelled">6</span></td></tr>
+                        <tr><td>Tue 25/3</td><td>203</td><td>11,230,000</td><td><span class="badge badge-delivered">198</span></td><td><span class="badge badge-cancelled">5</span></td></tr>
+                        <tr><td>Wed 26/3</td><td>198</td><td>10,970,000</td><td><span class="badge badge-delivered">190</span></td><td><span class="badge badge-cancelled">8</span></td></tr>
+                        <tr><td>Thu 27/3</td><td>220</td><td>12,100,000</td><td><span class="badge badge-delivered">216</span></td><td><span class="badge badge-cancelled">4</span></td></tr>
+                        <tr><td>Fri 28/3</td><td>215</td><td>11,980,000</td><td><span class="badge badge-delivered">209</span></td><td><span class="badge badge-cancelled">6</span></td></tr>
+                        <tr><td>Sat 29/3</td><td>236</td><td>13,050,000</td><td><span class="badge badge-delivered">229</span></td><td><span class="badge badge-cancelled">7</span></td></tr>
+                        <tr><td>Sun 30/3</td><td>223</td><td>12,440,000</td><td><span class="badge badge-delivered">220</span></td><td><span class="badge badge-cancelled">3</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div><!-- /reports panel -->
+
+    </main>
+</div>
+
+<!-- ══ MODAL: Add / Edit User ══ -->
+<div class="modal-overlay" id="userModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">User Details</div>
+            <button class="modal-close" onclick="closeModal('userModal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="modal-name">Full Name</label>
+            <input class="modal-input" id="modal-name" name="name" placeholder="Nguyen Van A" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="modal-email">Email</label>
+            <input class="modal-input" id="modal-email" name="email" type="email" placeholder="user@email.com" />
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="modal-role">Role</label>
+            <select class="modal-select" id="modal-role" name="role">
+                <option>Admin</option><option>Manager</option><option>Driver</option><option>Customer</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label class="modal-label" for="modal-phone">Phone</label>
+            <input class="modal-input" id="modal-phone" name="phone" placeholder="0901 234 567" />
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-cancel" onclick="closeModal('userModal')">Cancel</button>
+            <button class="btn-modal-save" onclick="closeModal('userModal')">Save User</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: User Detail View ══ -->
+<div class="modal-overlay" id="userDetailModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">User Profile</div>
+            <button class="modal-close" onclick="closeModal('userDetailModal')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 0 24px">
+            <div style="width:64px;height:64px;border-radius:50%;background:var(--yellow-dim);border:2px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-family:'Russo One',sans-serif;font-size:26px;color:var(--yellow);" id="detail-avatar">N</div>
+            <div style="font-family:'Russo One',sans-serif;font-size:18px;" id="detail-name">—</div>
+            <span class="badge badge-active">Active</span>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-kv"><label>Email</label><span id="detail-email">—</span></div>
+            <div class="detail-kv"><label>Role</label><span id="detail-role">—</span></div>
+            <div class="detail-kv"><label>Total Orders</label><span>142</span></div>
+            <div class="detail-kv"><label>Joined</label><span>2024-02-14</span></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-danger" onclick="closeModal('userDetailModal')">Deactivate</button>
+            <button class="btn-modal-cancel" onclick="closeModal('userDetailModal')">Close</button>
+            <button class="btn-modal-save" onclick="closeModal('userDetailModal');openModal('userModal')">Edit</button>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/dashboard.js"></script>
+<script>
+    // Populate user detail modal
+    const origOpen = window.openModal;
+    window.openModal = function(id, data={}) {
+        origOpen(id, data);
+        if (id === 'userDetailModal' && data.name) {
+            document.getElementById('detail-name').textContent = data.name;
+            document.getElementById('detail-email').textContent = data.email;
+            document.getElementById('detail-role').textContent = data.role;
+            document.getElementById('detail-avatar').textContent = data.name[0];
+        }
+    };
+</script>
+</body>
+</html>

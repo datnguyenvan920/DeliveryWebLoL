@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Client_Frontend</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/">DeliveryWebLoL</a>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Client_Frontend - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* Inject API base URL into the page so client-side ajax can target the API project when hosted separately *@
+    @{
+        // Safely get the API base URL from configuration or ViewData
+        var apiBaseUrl = ViewData["ApiBaseUrl"] as string ?? "";
+    }
+    <script>
+        // Serialized to a JS string to ensure it's valid and escaped
+        window.__apiBase__ = @System.Text.Json.JsonSerializer.Serialize(apiBaseUrl);
+
+        // Quick validation: warn if api base not provided
+        (function() {
+            var meta = document.querySelector('meta[name="api-base"]');
+            var metaVal = meta ? meta.content : '';
+            if (!metaVal || metaVal.trim() === '') {
+                console.warn('API base URL (ApiBaseUrl) is not configured in Client_Frontend. Client-side AJAX will fall back to a default. Set ApiBaseUrl in appsettings or supply window.__apiBase__.');
+            }
+        })();
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
