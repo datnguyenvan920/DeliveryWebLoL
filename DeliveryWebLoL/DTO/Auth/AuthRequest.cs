@@ -27,6 +27,11 @@ namespace DeliveryWebLoL.DTO.Auth
             public string Extra { get; set; } = string.Empty;
         }
 
+        public class ClaimAffiliationRequest
+        {
+            public Guid AffiliateLocationCode { get; set; }
+        }
+
         public class LogoutRequest
         {
             public string Username { get; set; } = null!;

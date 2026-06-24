@@ -1,67 +1,359 @@
-﻿@page
+@page
 @model Client_Frontend.Pages.ChooseRoleModel
 @{
-    ViewData["Title"] = "Choose Role";
+    ViewData["Title"] = "Choose Your Role";
+    Layout = null; /* standalone page — uses auth.css aesthetic */
 }
-<link rel="stylesheet" href="~/css/auth.css" />
-<body class="auth-page">
-    <div class="container-auth">
-        <div class="auth-card">
-            <div class="auth-logo">
-                <div class="mark">SM</div>
-                <div>
-                    <div class="auth-title">Choose your role</div>
-                    <div class="auth-sub">Select the role that best describes you</div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — DeliveryWebLoL</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    <style>
+        /* ── Page tokens ── */
+        :root {
+            --cr-bg:      #0B0E12;
+            --cr-surface: #12161D;
+            --cr-border:  #1C222B;
+            --cr-hover:   #1e2530;
+            --cr-yellow:  #F5C71B;
+            --cr-red:     #FF4D6A;
+            --cr-blue:    #3B82F6;
+            --cr-green:   #22c55e;
+            --cr-muted:   rgba(255,255,255,0.55);
+            --cr-subtle:  rgba(255,255,255,0.28);
+        }
 
-            <form method="post">
-                <div class="role-grid">
-                    <label class="role-card" id="card-owner">
-                        <input type="radio" name="SelectedRole" value="1" />
-                        <div class="role-name">Warehouse owner/manager</div>
-                        <div class="role-desc">Can manage inventory and approve orders</div>
-                    </label>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-                    <label class="role-card" id="card-worker">
-                        <input type="radio" name="SelectedRole" value="3" />
-                        <div class="role-name">Worker</div>
-                        <div class="role-desc">Operational worker for handling pickups/deliveries</div>
-                    </label>
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background: var(--cr-bg);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            /* subtle radial glow */
+            background-image: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(245,199,27,0.07) 0%, transparent 70%);
+        }
 
-                    <label class="role-card" id="card-aff">
-                        <input type="radio" name="SelectedRole" value="2" />
-                        <div class="role-name">Affiliate</div>
-                        <div class="role-desc">Affiliate who can request stock from warehouses</div>
-                    </label>
-                </div>
+        /* ── Card ── */
+        .cr-card {
+            width: 100%;
+            max-width: 540px;
+        }
 
-                <div style="margin-top:12px">
-                    <input asp-for="Extra" class="form-control auth-input" placeholder="Affiliation invite or extra info (required)" />
-                </div>
+        /* ── Brand header ── */
+        .cr-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+        .cr-mark {
+            width: 44px; height: 44px;
+            background: var(--cr-yellow);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Russo One', sans-serif;
+            font-size: 16px; color: #111;
+            box-shadow: 0 0 20px rgba(245,199,27,0.4);
+            flex-shrink: 0;
+        }
+        .cr-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: 0.02em;
+        }
+        .cr-subtitle {
+            font-size: 13px;
+            color: var(--cr-muted);
+            margin-top: 3px;
+        }
 
-                <div class="helper-row" style="margin-top:14px">
-                    <div></div>
-                    <button type="submit" class="btn-yellow">Save role</button>
-                </div>
-            </form>
+        /* ── Role grid ── */
+        .cr-role-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
 
-            <div class="footer-note">You can change your role later from account settings</div>
+        /* ── Role card ── */
+        .cr-role-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
+            border-radius: 12px;
+            background: var(--cr-surface);
+            border: 1px solid var(--cr-border);
+            cursor: pointer;
+            transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .cr-role-card input[type="radio"] { display: none; }
+        .cr-role-card:hover {
+            border-color: rgba(245,199,27,0.3);
+            background: var(--cr-hover);
+        }
+        .cr-role-card.selected {
+            border-color: var(--cr-yellow);
+            background: rgba(245,199,27,0.07);
+            box-shadow: 0 0 0 1px rgba(245,199,27,0.12), 0 4px 20px rgba(245,199,27,0.1);
+        }
+        .cr-role-card.selected .cr-role-check { opacity: 1; transform: scale(1); }
 
-            <div style="margin-top:12px;color:green">@Model.Message</div>
+        /* Accent left bar (changes per role via JS) */
+        .cr-role-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 10%; bottom: 10%;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: var(--cr-yellow);
+            opacity: 0;
+            transition: opacity 200ms ease;
+        }
+        .cr-role-card.selected::before { opacity: 1; }
+
+        /* Icon */
+        .cr-role-icon {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            background: rgba(245,199,27,0.1);
+            color: var(--cr-yellow);
+            border: 1px solid rgba(245,199,27,0.18);
+            transition: background 200ms ease, border-color 200ms ease;
+        }
+        .cr-role-card.selected .cr-role-icon {
+            background: rgba(245,199,27,0.18);
+        }
+
+        /* Text */
+        .cr-role-text { flex: 1; min-width: 0; }
+        .cr-role-name {
+            font-family: 'Russo One', sans-serif;
+            font-size: 14px;
+            color: #fff;
+            letter-spacing: 0.02em;
+        }
+        .cr-role-desc {
+            font-size: 12px;
+            color: var(--cr-muted);
+            margin-top: 3px;
+            line-height: 1.5;
+        }
+
+        /* Checkmark */
+        .cr-role-check {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: var(--cr-yellow);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            opacity: 0;
+            transform: scale(0.6);
+            transition: opacity 200ms ease, transform 200ms ease;
+        }
+        .cr-role-check svg { color: #111; }
+
+        /* ── Extra field ── */
+        .cr-field { margin-bottom: 16px; }
+        .cr-label {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            color: var(--cr-muted);
+            margin-bottom: 6px;
+        }
+        .cr-input {
+            width: 100%;
+            background: var(--cr-surface);
+            border: 1px solid var(--cr-border);
+            border-radius: 9px;
+            color: #fff;
+            padding: 11px 14px;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 13.5px;
+            outline: none;
+            transition: border-color 200ms ease, box-shadow 200ms ease;
+        }
+        .cr-input:focus {
+            border-color: var(--cr-yellow);
+            box-shadow: 0 0 0 3px rgba(245,199,27,0.12);
+        }
+        .cr-input::placeholder { color: var(--cr-subtle); font-style: italic; }
+
+        /* ── Bottom row ── */
+        .cr-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .cr-footer-note {
+            font-size: 12px;
+            color: var(--cr-subtle);
+        }
+        .cr-btn {
+            padding: 10px 28px;
+            border-radius: 9px;
+            background: var(--cr-yellow);
+            color: #111;
+            font-family: 'Russo One', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 14px rgba(245,199,27,0.3);
+            transition: filter 200ms ease, box-shadow 200ms ease;
+            position: relative; overflow: hidden;
+        }
+        .cr-btn::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+        }
+        .cr-btn:hover { filter: brightness(1.12); box-shadow: 0 4px 22px rgba(245,199,27,0.45); }
+        .cr-btn:hover::before { transform: translateX(100%); }
+
+        /* ── Success/Error message ── */
+        .cr-msg {
+            margin-top: 16px;
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-size: 13px;
+            display: none;
+        }
+        .cr-msg.show { display: block; }
+        .cr-msg.ok  { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+        .cr-msg.err { background: rgba(255,77,106,0.1); border: 1px solid rgba(255,77,106,0.3); color: #FF4D6A; }
+    </style>
+</head>
+<body>
+
+<div class="cr-card">
+    <!-- Header -->
+    <div class="cr-header">
+        <div class="cr-mark">DW</div>
+        <div>
+            <div class="cr-title">Choose Your Role</div>
+            <div class="cr-subtitle">Select the role that best describes you to continue</div>
         </div>
     </div>
 
-    <script>
-        // role card selection visual
-        document.addEventListener('DOMContentLoaded', function(){
-            const cards = document.querySelectorAll('.role-card');
-            cards.forEach(c => c.addEventListener('click', function(e){
-                cards.forEach(x=>x.classList.remove('selected'));
-                this.classList.add('selected');
-                const input = this.querySelector('input[type=radio]');
-                if(input) input.checked = true;
-            }));
+    <form method="post">
+        <!-- Role Cards -->
+        <div class="cr-role-grid">
+
+            <label class="cr-role-card" id="card-owner">
+                <input type="radio" name="SelectedRole" value="1" />
+                <div class="cr-role-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                </div>
+                <div class="cr-role-text">
+                    <div class="cr-role-name">Warehouse Manager</div>
+                    <div class="cr-role-desc">Manage inventory, warehouses and approve orders</div>
+                </div>
+                <div class="cr-role-check">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </label>
+
+            <label class="cr-role-card" id="card-worker">
+                <input type="radio" name="SelectedRole" value="3" />
+                <div class="cr-role-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;border-color:rgba(59,130,246,0.18);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                        <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                </div>
+                <div class="cr-role-text">
+                    <div class="cr-role-name">Worker / Driver</div>
+                    <div class="cr-role-desc">Handle pickups and deliveries on the ground</div>
+                </div>
+                <div class="cr-role-check">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </label>
+
+            <label class="cr-role-card" id="card-aff">
+                <input type="radio" name="SelectedRole" value="2" />
+                <div class="cr-role-icon" style="background:rgba(168,85,247,0.1);color:#a855f7;border-color:rgba(168,85,247,0.18);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/>
+                        <path d="M16 11l2 2 4-4" style="stroke:#a855f7"/>
+                    </svg>
+                </div>
+                <div class="cr-role-text">
+                    <div class="cr-role-name">Affiliate</div>
+                    <div class="cr-role-desc">Partner who can request stock from warehouses</div>
+                </div>
+                <div class="cr-role-check">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+            </label>
+
+        </div>
+
+        <!-- Extra info field -->
+        <div class="cr-field">
+            <label class="cr-label" for="extra-input">Affiliation Code / Invite <span style="font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.25);font-size:10px;margin-left:4px;">(required for affiliates)</span></label>
+            <input asp-for="Extra" class="cr-input" id="extra-input" placeholder="Enter invite code or affiliation ID" autocomplete="off" />
+        </div>
+
+        <!-- Footer -->
+        <div class="cr-footer">
+            <div class="cr-footer-note">You can update your role later in account settings</div>
+            <button type="submit" class="cr-btn">Save Role</button>
+        </div>
+    </form>
+
+    <!-- Result message -->
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        var isOk = Model.Message.Contains("success", StringComparison.OrdinalIgnoreCase);
+        <div class="cr-msg show @(isOk ? "ok" : "err")">@Model.Message</div>
+    }
+</div>
+
+<script>
+(function () {
+    var cards = document.querySelectorAll('.cr-role-card');
+    cards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            cards.forEach(function(c) { c.classList.remove('selected'); });
+            card.classList.add('selected');
+            var radio = card.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
         });
-    </script>
+    });
+    // Pre-select if already checked (browser back/reload)
+    cards.forEach(function(card) {
+        var radio = card.querySelector('input[type="radio"]');
+        if (radio && radio.checked) card.classList.add('selected');
+    });
+})();
+</script>
 </body>
+</html>

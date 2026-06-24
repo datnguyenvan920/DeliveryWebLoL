@@ -1,0 +1,1143 @@
+@page "{Id:guid}"
+@model Client_Frontend.Pages.WarehouseDetailModel
+@{
+    ViewData["Title"] = Model.Warehouse?.Name ?? "Warehouse Detail";
+    Layout = "_ManagerLayout";
+    var w = Model.Warehouse;
+    var warehouseId = w?.LocationID.ToString() ?? "";
+}
+
+@section Head {
+<style>
+/* â”€â”€ Page shell â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-page { padding: 28px 28px 60px; }
+
+/* â”€â”€ Back link â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-back {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px; color: rgba(255,255,255,0.45);
+    text-decoration: none; margin-bottom: 22px;
+    transition: color 180ms ease;
+}
+.wd-back:hover { color: #F5C71B; }
+
+/* â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.wd-title-block {}
+.wd-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 24px; color: #fff; letter-spacing: 0.02em;
+}
+.wd-subtitle { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+.wd-id-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(245,199,27,0.08); border: 1px solid rgba(245,199,27,0.2);
+    border-radius: 20px; padding: 3px 12px;
+    font-size: 11px; color: rgba(245,199,27,0.8); margin-top: 8px;
+    font-family: monospace; letter-spacing: 0.04em;
+}
+
+/* â”€â”€ Main grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+@@media (max-width: 900px) { .wd-grid { grid-template-columns: 1fr; } }
+
+/* â”€â”€ Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-panel {
+    background: #12161D;
+    border: 1px solid #1C222B;
+    border-radius: 14px;
+    overflow: hidden;
+}
+.wd-panel-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #1C222B;
+}
+.wd-panel-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: rgba(245,199,27,0.1);
+    border: 1px solid rgba(245,199,27,0.18);
+    display: flex; align-items: center; justify-content: center;
+    color: #F5C71B;
+    flex-shrink: 0;
+}
+.wd-panel-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13.5px; color: #fff; letter-spacing: 0.03em;
+}
+.wd-panel-body { padding: 20px; }
+
+/* â”€â”€ Field â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-field { margin-bottom: 16px; }
+.wd-field:last-child { margin-bottom: 0; }
+.wd-label {
+    display: block;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(255,255,255,0.38);
+    margin-bottom: 6px;
+}
+.wd-input, .wd-select {
+    width: 100%;
+    background: #0B0E12;
+    border: 1px solid #1C222B;
+    border-radius: 9px;
+    color: #fff;
+    padding: 10px 13px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.wd-input:focus, .wd-select:focus {
+    border-color: #F5C71B;
+    box-shadow: 0 0 0 3px rgba(245,199,27,0.1);
+}
+.wd-input[readonly] {
+    color: rgba(255,255,255,0.45);
+    cursor: default;
+    border-color: rgba(255,255,255,0.06);
+}
+.wd-select option { background: #12161D; }
+
+/* â”€â”€ Save btn â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-btn-save {
+    width: 100%; padding: 10px;
+    border-radius: 9px;
+    background: #F5C71B; color: #111;
+    font-family: 'Russo One', sans-serif; font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: none; cursor: pointer;
+    box-shadow: 0 2px 14px rgba(245,199,27,0.25);
+    transition: filter 180ms ease, box-shadow 180ms ease;
+    margin-top: 18px;
+}
+.wd-btn-save:hover { filter: brightness(1.1); box-shadow: 0 4px 22px rgba(245,199,27,0.4); }
+.wd-btn-save.wd-loading { filter: brightness(0.7); pointer-events: none; }
+
+/* â”€â”€ Owner card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-owner-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, #F5C71B, #e6a800);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Russo One', sans-serif; font-size: 18px; color: #111;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(245,199,27,0.3);
+}
+.wd-owner-row { display: flex; align-items: center; gap: 14px; }
+.wd-owner-name { font-weight: 700; font-size: 14px; color: #fff; }
+.wd-owner-sub  { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.wd-kv { margin-top: 14px; }
+.wd-kv label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: rgba(255,255,255,0.3);
+    display: block; margin-bottom: 3px;
+}
+.wd-kv span { font-size: 13px; color: rgba(255,255,255,0.75); font-family: monospace; }
+
+/* â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-tabs {
+    display: flex; gap: 4px;
+    border-bottom: 1px solid #1C222B;
+    padding: 0 20px;
+}
+.wd-tab {
+    padding: 12px 18px;
+    font-size: 13px; font-weight: 600;
+    color: rgba(255,255,255,0.45);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    transition: color 180ms ease, border-color 180ms ease;
+    border-radius: 6px 6px 0 0;
+    display: flex; align-items: center; gap: 7px;
+}
+.wd-tab:hover { color: #fff; }
+.wd-tab.active { color: #F5C71B; border-bottom-color: #F5C71B; }
+.wd-tab-panel { display: none; padding: 22px 20px; }
+.wd-tab-panel.active { display: block; }
+
+/* â”€â”€ Item list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-item-list { display: flex; flex-direction: column; gap: 10px; }
+.wd-item-row {
+    display: flex; align-items: center; gap: 14px;
+    background: #0B0E12;
+    border: 1px solid #1C222B;
+    border-radius: 10px;
+    padding: 13px 16px;
+    transition: border-color 180ms ease;
+}
+.wd-item-row:hover { border-color: rgba(245,199,27,0.2); }
+.wd-item-badge {
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; flex-shrink: 0;
+}
+.wd-badge-final {
+    background: rgba(245,199,27,0.12); color: #F5C71B;
+    border: 1px solid rgba(245,199,27,0.25);
+}
+.wd-badge-ingredient {
+    background: rgba(59,130,246,0.12); color: #60a5fa;
+    border: 1px solid rgba(59,130,246,0.25);
+}
+.wd-item-name { font-weight: 700; font-size: 13.5px; color: #fff; }
+.wd-item-sku  { font-size: 11.5px; color: rgba(255,255,255,0.4); margin-top: 2px; font-family: monospace; }
+.wd-item-meta {
+    margin-left: auto; text-align: right;
+    font-size: 12px; color: rgba(255,255,255,0.5);
+    flex-shrink: 0;
+}
+.wd-item-qty  { font-family: 'Russo One', sans-serif; font-size: 14px; color: #F5C71B; }
+.wd-item-upm  { font-size: 11px; color: rgba(59,130,246,0.85); margin-top: 2px; }
+.wd-empty { text-align: center; padding: 36px 0; color: rgba(255,255,255,0.28); font-size: 13px; }
+
+/* â”€â”€ 3-step wizard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.wd-wizard { max-width: 520px; }
+
+.wd-steps {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 26px; position: relative;
+}
+.wd-step {
+    display: flex; align-items: center; flex: 1; position: relative;
+}
+.wd-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 2px solid #1C222B;
+    background: #0B0E12;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.3);
+    flex-shrink: 0; z-index: 1;
+    transition: border-color 250ms ease, color 250ms ease, background 250ms ease;
+}
+.wd-step.active .wd-step-num  { border-color: #F5C71B; color: #111; background: #F5C71B; }
+.wd-step.done   .wd-step-num  { border-color: #22c55e; color: #111; background: #22c55e; }
+.wd-step-label {
+    font-size: 11px; color: rgba(255,255,255,0.35);
+    margin-left: 8px; white-space: nowrap;
+    transition: color 250ms ease;
+}
+.wd-step.active .wd-step-label { color: #F5C71B; font-weight: 700; }
+.wd-step.done   .wd-step-label { color: #22c55e; }
+.wd-step-line {
+    flex: 1; height: 1px; background: #1C222B; margin: 0 10px;
+    transition: background 250ms ease;
+}
+.wd-step.done + .wd-step .wd-step-line { background: #22c55e; }
+
+/* Step panels */
+.wd-step-panel { display: none; }
+.wd-step-panel.active { display: block; }
+
+/* Type selector */
+.wd-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.wd-type-card {
+    padding: 18px 16px; border-radius: 12px;
+    background: #0B0E12; border: 1px solid #1C222B;
+    cursor: pointer; text-align: center;
+    transition: border-color 200ms ease, background 200ms ease;
+    position: relative;
+}
+.wd-type-card:hover { border-color: rgba(245,199,27,0.25); background: #1e2530; }
+.wd-type-card.selected {
+    border-color: #F5C71B;
+    background: rgba(245,199,27,0.06);
+    box-shadow: 0 0 0 1px rgba(245,199,27,0.1);
+}
+.wd-type-icon {
+    width: 40px; height: 40px; border-radius: 10px; margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+}
+.wd-type-final .wd-type-icon      { background: rgba(245,199,27,0.1); color: #F5C71B; }
+.wd-type-ingredient .wd-type-icon { background: rgba(59,130,246,0.1); color: #60a5fa; }
+.wd-type-name { font-family: 'Russo One', sans-serif; font-size: 13px; color: #fff; }
+.wd-type-desc { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; line-height: 1.4; }
+.wd-type-card.selected .wd-type-name { color: #F5C71B; }
+.wd-type-ingredient.selected .wd-type-name { color: #60a5fa; }
+
+/* Alert */
+.wd-alert {
+    display: none; padding: 10px 13px; border-radius: 9px; font-size: 12.5px;
+    background: rgba(255,77,106,0.1); border: 1px solid rgba(255,77,106,0.3);
+    color: #FF4D6A; margin-bottom: 14px;
+}
+.wd-alert.show { display: block; }
+.wd-alert.ok   { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: #4ade80; }
+
+/* Nav buttons */
+.wd-wizard-nav { display: flex; gap: 10px; margin-top: 22px; }
+.wd-btn-next, .wd-btn-prev {
+    padding: 9px 22px; border-radius: 9px;
+    font-family: 'Chakra Petch', sans-serif; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; border: none;
+    transition: filter 180ms ease;
+}
+.wd-btn-next {
+    background: #F5C71B; color: #111;
+    box-shadow: 0 2px 12px rgba(245,199,27,0.25);
+}
+.wd-btn-next:hover { filter: brightness(1.1); }
+.wd-btn-next:disabled { opacity: 0.4; pointer-events: none; }
+.wd-btn-prev {
+    background: #171C25; color: rgba(255,255,255,0.6);
+    border: 1px solid #1C222B;
+}
+.wd-btn-prev:hover { color: #fff; border-color: rgba(255,255,255,0.15); }
+.wd-btn-submit {
+    padding: 9px 28px; border-radius: 9px;
+    background: #22c55e; color: #fff;
+    font-family: 'Russo One', sans-serif; font-size: 11.5px; letter-spacing: 0.06em;
+    border: none, cursor: pointer;
+    box-shadow: 0 2px 12px rgba(34,197,94,0.25);
+    transition: filter 180ms ease; text-transform: uppercase;
+}
+.wd-btn-submit:hover { filter: brightness(1.1); }
+.wd-btn-submit.loading { opacity: 0.55; pointer-events: none; }
+
+/* Review summary */
+.wd-review {
+    background: #0B0E12; border: 1px solid #1C222B;
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 18px;
+}
+.wd-review-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+}
+.wd-review-row:last-child { border-bottom: none; padding-bottom: 0; }
+.wd-review-row label { color: rgba(255,255,255,0.38); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+.wd-review-row span  { color: #fff; font-weight: 600; font-family: monospace; }
+.wd-review-row .wd-item-badge { font-size: 9px; }
+
+/* Edit button */
+.wd-btn-edit {
+    margin-left: 10px;
+    background: #171C25;
+    border: 1px solid #1C222B;
+    color: rgba(255,255,255,0.7);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+.wd-btn-edit:hover { color: #fff; border-color: rgba(245,199,27,0.25); }
+
+/* Simple modal */
+.wd-modal-wrap {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 16px;
+}
+.wd-modal-wrap.open { display: flex; }
+.wd-modal-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.78);
+    backdrop-filter: blur(4px);
+}
+.wd-modal {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+    background: #12161D;
+    border: 1px solid rgba(245,199,27,0.2);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.wd-modal-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid #1C222B;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.wd-modal-title { font-family: 'Russo One', sans-serif; font-size: 13px; color: #fff; letter-spacing: 0.03em; }
+.wd-modal-x {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: #171C25;
+    border: 1px solid #1C222B;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+}
+.wd-modal-x:hover { color: #FF4D6A; border-color: rgba(255,77,106,0.3); }
+.wd-modal-body { padding: 16px; }
+.wd-modal-foot {
+    padding: 14px 16px;
+    border-top: 1px solid #1C222B;
+    display:flex;
+    justify-content:flex-end;
+    gap: 10px;
+}
+.wd-btn-cancel {
+    padding: 9px 16px;
+    border-radius: 9px;
+    background: #171C25;
+    border: 1px solid #1C222B;
+    color: rgba(255,255,255,0.65);
+    cursor: pointer;
+}
+.wd-btn-cancel:hover { color: #fff; border-color: rgba(255,255,255,0.15); }
+.wd-btn-submit2 {
+    padding: 9px 18px;
+    border-radius: 9px;
+    background: #F5C71B;
+    border: none;
+    color: #111;
+    cursor: pointer;
+    font-family: 'Russo One', sans-serif;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.wd-btn-submit2.loading { opacity: 0.6; pointer-events: none; }
+</style>
+}
+
+<div class="wd-page">
+
+    <!-- Back -->
+    <a class="wd-back" href="/ManagerHome">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Operations
+    </a>
+
+    <!-- Page header -->
+    <div class="wd-header">
+        <div class="wd-title-block">
+            <div class="wd-title">@(w?.Name ?? "Warehouse")</div>
+            <div class="wd-subtitle">Warehouse details, owner &amp; item production</div>
+            <div class="wd-id-chip">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                @warehouseId
+            </div>
+        </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="wd-grid">
+
+        <!-- LEFT: Info + Owner -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+            <!-- Warehouse Info panel -->
+            <div class="wd-panel">
+                <div class="wd-panel-header">
+                    <div class="wd-panel-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="wd-panel-title">Warehouse Info</div>
+                    </div>
+                </div>
+                <div class="wd-panel-body">
+                    <div id="wdInfoMsg" class="wd-alert"></div>
+                    <div class="wd-field">
+                        <label class="wd-label">Name</label>
+                        <input class="wd-input" id="wdName" type="text" value="@(w?.Name ?? "")" placeholder="Warehouse name" />
+                    </div>
+                    <div class="wd-field">
+                        <label class="wd-label">Address</label>
+                        <input class="wd-input" id="wdAddress" type="text" value="@(w?.Address ?? "")" placeholder="Physical address" />
+                    </div>
+                    <div class="wd-field">
+                        <label class="wd-label">Location ID</label>
+                        <input class="wd-input" id="wdLocId" type="text" value="@warehouseId" readonly />
+                    </div>
+                    <div class="wd-field">
+                        <label class="wd-label">Location Type</label>
+                        <input class="wd-input" type="text" value="@(w?.LocationType == 1 ? "Warehouse (1)" : $"Type {w?.LocationType}")" readonly />
+                    </div>
+                    <button class="wd-btn-save" id="wdSaveInfo" type="button">Save Changes</button>
+                </div>
+            </div>
+
+            <!-- Owner panel -->
+            <div class="wd-panel">
+                <div class="wd-panel-header">
+                    <div class="wd-panel-icon" style="background:rgba(59,130,246,0.1);color:#60a5fa;border-color:rgba(59,130,246,0.18);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="wd-panel-title">Owner</div>
+                </div>
+                <div class="wd-panel-body">
+                    <div class="wd-owner-row">
+                        <div class="wd-owner-avatar">@(Model.OwnerUsername.Length > 0 ? Model.OwnerUsername[0].ToString().ToUpper() : "?")</div>
+                        <div>
+                            <div class="wd-owner-name">@Model.OwnerUsername</div>
+                            <div class="wd-owner-sub">Manager Â· Warehouse Owner</div>
+                        </div>
+                    </div>
+                    <div class="wd-kv">
+                        <label>Warehouse ID</label>
+                        <span>@warehouseId</span>
+                    </div>
+                    <div class="wd-kv">
+                        <label>Role</label>
+                        <span>Manager</span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /left -->
+
+        <!-- RIGHT: Items panel -->
+        <div class="wd-panel" style="min-height:400px;">
+            <div class="wd-tabs" id="wdTabBar">
+                <div class="wd-tab active" data-tab="list" id="wdTabList">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    Item List
+                    <span id="wdItemCount" style="background:rgba(245,199,27,0.15);color:#F5C71B;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;">0</span>
+                </div>
+                <div class="wd-tab" data-tab="add" id="wdTabAdd">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Item
+                </div>
+            </div>
+
+            <!-- â”€â”€ LIST TAB â”€â”€ -->
+            <div class="wd-tab-panel active" id="wdPanelList">
+                <div class="wd-item-list" id="wdItemList">
+                    <div class="wd-empty" id="wdEmptyMsg" style="@(Model.Items.Count == 0 ? "" : "display:none;")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" style="display:block;margin:0 auto 10px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        No items yet â€” use the <strong style="color:rgba(255,255,255,0.5)">Add Item</strong> tab to create one.
+                    </div>
+
+                    @if (Model.Items.Count > 0)
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            var isFinal = item.ItemCategory == 1;
+                            <div class="wd-item-row">
+                                <span class="wd-item-badge @(isFinal ? "wd-badge-final" : "wd-badge-ingredient")">
+                                    @(isFinal ? "Final" : "Ingredient")
+                                </span>
+                                <div>
+                                    <div class="wd-item-name">@item.Name</div>
+                                    <div class="wd-item-sku">@item.SKU</div>
+                                </div>
+                                <div class="wd-item-meta">
+                                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+                                        <div>
+                                            <div class="wd-item-qty" @(isFinal ? $"data-prod-qty=\"1\" data-base-qty=\"@item.Quantity\" data-upm=\"@item.UnitsPerMinute\" data-enabled=\"{(item.IsProductionEnabled ? "true" : "false")}\" data-unit=\"@item.Unit\"" : "")>@item.Quantity@(string.IsNullOrWhiteSpace(item.Unit) ? "" : " " + item.Unit)</div>
+                                            @if (isFinal)
+                                            {
+                                                <div class="wd-item-upm">âš¡ @item.UnitsPerMinute UPM</div>
+                                            }
+                                        </div>
+                                        <button type="button"
+                                                class="wd-btn-edit"
+                                                data-edit-item
+                                                data-item-id="@item.ItemId"
+                                                data-item-name="@item.Name"
+                                                data-item-unit="@item.Unit"
+                                                data-item-upm="@item.UnitsPerMinute"
+                                                data-item-enabled="@(item.IsProductionEnabled ? "true" : "false")">
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- â”€â”€ ADD ITEM TAB â”€â”€ -->
+            <div class="wd-tab-panel" id="wdPanelAdd">
+                <div class="wd-wizard" id="wdWizard">
+
+                    <!-- Step indicators -->
+                    <div class="wd-steps" id="wdStepBar">
+                        <div class="wd-step active" id="wdSInd1">
+                            <div class="wd-step-num">1</div>
+                            <div class="wd-step-label">Type</div>
+                        </div>
+                        <div class="wd-step-line"></div>
+                        <div class="wd-step" id="wdSInd2">
+                            <div class="wd-step-num">2</div>
+                            <div class="wd-step-label">Production</div>
+                        </div>
+                        <div class="wd-step-line"></div>
+                        <div class="wd-step" id="wdSInd3">
+                            <div class="wd-step-num">3</div>
+                            <div class="wd-step-label">Details</div>
+                        </div>
+                    </div>
+
+                    <div id="wdWizardAlert" class="wd-alert"></div>
+
+                    <!-- â”€â”€ STEP 1: Type â”€â”€ -->
+                    <div class="wd-step-panel active" id="wdStep1">
+                        <p style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px;">Is this item a finished product or a raw ingredient?</p>
+                        <div class="wd-type-grid">
+                            <div class="wd-type-card wd-type-final" id="wdTypeFinal" data-value="1">
+                                <div class="wd-type-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                </div>
+                                <div class="wd-type-name">Final Product</div>
+                                <div class="wd-type-desc">Finished goods ready for delivery. Has a production rate.</div>
+                            </div>
+                            <div class="wd-type-card wd-type-ingredient" id="wdTypeIngredient" data-value="0">
+                                <div class="wd-type-icon" style="background:rgba(59,130,246,0.1);color:#60a5fa;border-color:rgba(59,130,246,0.18);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                </div>
+                                <div class="wd-type-name">Ingredient</div>
+                                <div class="wd-type-desc">Raw material or component used in production.</div>
+                            </div>
+                        </div>
+                        <div class="wd-wizard-nav">
+                            <button class="wd-btn-next" id="wdNext1" disabled>Next â†’</button>
+                        </div>
+                    </div>
+
+                    <!-- â”€â”€ STEP 2: Production â”€â”€ -->
+                    <div class="wd-step-panel" id="wdStep2">
+                        <div id="wdProductionSection">
+                            <p style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px;">Set the production efficiency for this final product.</p>
+                            <div class="wd-field">
+                                <label class="wd-label">Units Per Minute <span style="color:#60a5fa;">(production rate)</span></label>
+                                <input class="wd-input" id="wdUpm" type="number" min="0" step="0.01" placeholder="e.g. 12.5" />
+                            </div>
+                            <div class="wd-field">
+                                <label class="wd-label">Unit Label <span style="color:rgba(255,255,255,0.25);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(optional, e.g. pcs, kg, box)</span></label>
+                                <input class="wd-input" id="wdUnit" type="text" placeholder="pcs" />
+                            </div>
+                            <div style="background:rgba(245,199,27,0.06);border:1px solid rgba(245,199,27,0.18);border-radius:9px;padding:11px 14px;font-size:12px;color:rgba(245,199,27,0.75);margin-bottom:4px;">
+                                <strong>Tip:</strong> UnitPerMin defines how fast this product is produced. Set 0 if production is not scheduled yet.
+                            </div>
+                        </div>
+                        <div id="wdIngredientSection" style="display:none;">
+                            <p style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px;">Ingredients don't have a production rate. You can set a unit label if needed.</p>
+                            <div class="wd-field">
+                                <label class="wd-label">Unit Label <span style="color:rgba(255,255,255,0.25);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(optional, e.g. kg, L, pcs)</span></label>
+                                <input class="wd-input" id="wdUnitIngredient" type="text" placeholder="kg" />
+                            </div>
+                        </div>
+                        <div class="wd-wizard-nav">
+                            <button class="wd-btn-prev" id="wdPrev2">â† Back</button>
+                            <button class="wd-btn-next" id="wdNext2">Next â†’</button>
+                        </div>
+                    </div>
+
+                    <!-- â”€â”€ STEP 3: Details â”€â”€ -->
+                    <div class="wd-step-panel" id="wdStep3">
+                        <p style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px;">Enter the item identifiers and starting inventory.</p>
+                        <div class="wd-field">
+                            <label class="wd-label">Item Name <span style="color:#FF4D6A;">*</span></label>
+                            <input class="wd-input" id="wdItemName" type="text" placeholder="e.g. Steel Bolt v2" />
+                        </div>
+                        <div class="wd-field">
+                            <label class="wd-label">SKU <span style="color:#FF4D6A;">*</span></label>
+                            <input class="wd-input" id="wdSku" type="text" placeholder="e.g. STL-BOLT-002" style="font-family:monospace;" />
+                        </div>
+                        <div class="wd-field">
+                            <label class="wd-label">Initial Quantity</label>
+                            <input class="wd-input" id="wdInitQty" type="number" min="0" step="0.01" value="0" placeholder="0" />
+                        </div>
+
+                        <!-- Review summary -->
+                        <div class="wd-review" id="wdReview" style="display:none;">
+                            <div class="wd-review-row"><label>Type</label>     <span id="rvType">â€”</span></div>
+                            <div class="wd-review-row"><label>UPM</label>      <span id="rvUpm">â€”</span></div>
+                            <div class="wd-review-row"><label>Unit</label>     <span id="rvUnit">â€”</span></div>
+                            <div class="wd-review-row"><label>Name</label>     <span id="rvName">â€”</span></div>
+                            <div class="wd-review-row"><label>SKU</label>      <span id="rvSku">â€”</span></div>
+                            <div class="wd-review-row"><label>Init. Qty</label><span id="rvQty">â€”</span></div>
+                        </div>
+
+                        <div class="wd-wizard-nav">
+                            <button class="wd-btn-prev" id="wdPrev3">â† Back</button>
+                            <button class="wd-btn-submit" id="wdSubmit" type="button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                Add Item
+                            </button>
+                        </div>
+                    </div>
+
+                </div><!-- /wizard -->
+            </div><!-- /add panel -->
+
+        </div><!-- /right panel -->
+    </div><!-- /grid -->
+</div><!-- /page -->
+
+<!-- Edit Item Modal -->
+<div class="wd-modal-wrap" id="wdEditModal" role="dialog" aria-modal="true" aria-label="Edit item">
+    <div class="wd-modal">
+        <div class="wd-modal-head">
+            <div class="wd-modal-title">Edit Item</div>
+            <button type="button" class="wd-modal-x" id="wdEditClose" aria-label="Close">âœ•</button>
+        </div>
+        <div class="wd-modal-body">
+            <div id="wdEditMsg" class="wd-alert"></div>
+
+            <input type="hidden" id="wdEditItemId" />
+
+            <div class="wd-field">
+                <label class="wd-label">Name</label>
+                <input class="wd-input" id="wdEditName" type="text" />
+            </div>
+            <div class="wd-field">
+                <label class="wd-label">Unit</label>
+                <input class="wd-input" id="wdEditUnit" type="text" placeholder="pcs" />
+            </div>
+            <div class="wd-field">
+                <label class="wd-label">Units Per Minute</label>
+                <input class="wd-input" id="wdEditUpm" type="number" min="0" step="0.01" />
+            </div>
+            <div class="wd-field">
+                <label class="wd-label">Enabled</label>
+                <select class="wd-select" id="wdEditEnabled">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                </select>
+            </div>
+        </div>
+        <div class="wd-modal-foot">
+            <button type="button" class="wd-btn-cancel" id="wdEditCancel">Cancel</button>
+            <button type="button" class="wd-btn-submit2" id="wdEditSave">Save</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    'use strict';
+
+    /* ── Constants ─────────────────────────────────────────── */
+    var WAREHOUSE_ID = '@warehouseId';
+
+    // Start time for the fake production simulation
+    var __prodT0 = Date.now();
+
+    /* ── Seed items from server ─────────────────────────────── */
+    var itemList = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Items, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+
+    /* ── Antiforgery helper ─────────────────────────────────── */
+    function getAft() {
+        var el = document.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : '';
+    }
+
+    /* ── HTML escape ────────────────────────────────────────── */
+    function esc(s) {
+        return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    /* ── Fake production helpers ────────────────────────────── */
+    function numberOr(n, fallback) {
+        var x = Number(n);
+        return Number.isFinite(x) ? x : fallback;
+    }
+
+    function formatQty(q) {
+        // Keep it readable: show integers without decimals; otherwise 2 decimals.
+        if (!Number.isFinite(q)) return '0';
+        var isInt = Math.abs(q - Math.round(q)) < 1e-9;
+        return isInt ? String(Math.round(q)) : q.toFixed(2);
+    }
+
+    function simulatedQty(baseQty, upm, elapsedMs) {
+        // upm (units/minute) -> units/ms
+        var add = (upm / 60000) * elapsedMs;
+        return baseQty + add;
+    }
+
+    function updateSimulatedQuantities() {
+        var elapsed = Date.now() - __prodT0;
+
+        document.querySelectorAll('[data-prod-qty="1"]').forEach(function (el) {
+            // Only simulate for final products that are enabled
+            var baseQty = numberOr(el.getAttribute('data-base-qty'), 0);
+            var upm = numberOr(el.getAttribute('data-upm'), 0);
+            var enabled = (el.getAttribute('data-enabled') || 'false') === 'true';
+            var unit = el.getAttribute('data-unit') || '';
+
+            if (!enabled || upm <= 0) {
+                // show base, no simulation
+                el.textContent = formatQty(baseQty) + (unit ? ' ' + unit : '');
+                return;
+            }
+
+            var q = simulatedQty(baseQty, upm, elapsed);
+            el.textContent = formatQty(q) + (unit ? ' ' + unit : '');
+        });
+    }
+
+    /* ── Tab switching ──────────────────────────────────────── */
+    document.querySelectorAll('.wd-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var target = this.dataset.tab;
+            document.querySelectorAll('.wd-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.wd-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            document.getElementById('wdPanel' + target.charAt(0).toUpperCase() + target.slice(1)).classList.add('active');
+        });
+    });
+
+    /* ── Save Warehouse Info ────────────────────────────────── */
+    var saveBtn = document.getElementById('wdSaveInfo');
+    var infoMsg = document.getElementById('wdInfoMsg');
+
+    function showInfoMsg(txt, ok) {
+        infoMsg.textContent = txt;
+        infoMsg.className = 'wd-alert show' + (ok ? ' ok' : '');
+        if (ok) setTimeout(function() { infoMsg.className = 'wd-alert'; }, 4000);
+    }
+
+    saveBtn.addEventListener('click', function() {
+        var name    = document.getElementById('wdName').value.trim();
+        var address = document.getElementById('wdAddress').value.trim();
+        if (!name) { showInfoMsg('Name is required.'); return; }
+        saveBtn.classList.add('wd-loading');
+        saveBtn.textContent = 'Saving\u2026';
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', getAft());
+        fd.append('warehouseId', WAREHOUSE_ID);
+        fd.append('name',    name);
+        fd.append('address', address);
+        // optional coordinates (if fields get added later)
+        fd.append('latitude',  '');
+        fd.append('longitude', '');
+        fetch('?handler=UpdateWarehouse', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(j) {
+                saveBtn.classList.remove('wd-loading');
+                saveBtn.textContent = 'Save Changes';
+                showInfoMsg(j.message || (j.success ? 'Saved.' : 'Error.'), j.success);
+            })
+            .catch(function(e) {
+                saveBtn.classList.remove('wd-loading');
+                saveBtn.textContent = 'Save Changes';
+                showInfoMsg('Network error: ' + e.message);
+            });
+    });
+
+    /* ── Item list rendering ────────────────────────────────── */
+    var listEl  = document.getElementById('wdItemList');
+    var emptyEl = document.getElementById('wdEmptyMsg');
+    var countEl = document.getElementById('wdItemCount');
+
+    function renderItems() {
+        countEl.textContent = itemList.length;
+        if (itemList.length === 0) { emptyEl.style.display = ''; return; }
+        emptyEl.style.display = 'none';
+        listEl.querySelectorAll('.wd-item-row').forEach(function(r) { r.remove(); });
+
+        itemList.forEach(function(item) {
+            var isFinal = item.itemCategory === 1;
+            var qty = (item.quantity !== undefined ? item.quantity : item.initialQuantity);
+            var itemId = item.itemId || '';
+            var upm = (item.unitsPerMinute || 0);
+            var enabled = item.isProductionEnabled ? 'true' : 'false';
+            var unit = item.unit ? esc(item.unit) : '';
+
+            var row = document.createElement('div');
+            row.className = 'wd-item-row';
+            row.innerHTML =
+                '<span class="wd-item-badge ' + (isFinal ? 'wd-badge-final' : 'wd-badge-ingredient') + '">' 
+                    + (isFinal ? 'Final' : 'Ingredient') + '</span>'
+                + '<div>'
+                    + '<div class="wd-item-name">' + esc(item.name) + '</div>'
+                    + '<div class="wd-item-sku">' + esc(item.sku || '') + '</div>'
+                + '</div>'
+                + '<div class="wd-item-meta">'
+                    + '<div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;">'
+                        + '<div>'
+                            + '<div class="wd-item-qty"'
+                                + (isFinal ? ' data-prod-qty="1" data-base-qty="' + qty + '" data-upm="' + upm + '" data-enabled="' + enabled + '" data-unit="' + unit + '"' : '') + '>'
+                                + formatQty(qty) + (unit ? ' ' + unit : '')
+                            + '</div>'
+                            + (isFinal ? '<div class="wd-item-upm">\u26a1 ' + upm + ' UPM</div>' : '')
+                        + '</div>'
+                        + '<button type="button" class="wd-btn-edit" data-edit-item'
+                            + ' data-item-id="' + esc(itemId) + '"'
+                            + ' data-item-name="' + esc(item.name) + '"'
+                            + ' data-item-unit="' + esc(item.unit || '') + '"'
+                            + ' data-item-upm="' + upm + '"'
+                            + ' data-item-enabled="' + enabled + '">Edit</button>'
+                    + '</div>'
+                + '</div>';
+
+            listEl.appendChild(row);
+        });
+
+        // After rendering, immediately apply simulated quantities once.
+        updateSimulatedQuantities();
+    }
+
+    /* ── Edit Modal ─────────────────────────────────────────── */
+    var modal = document.getElementById('wdEditModal');
+
+    function openModal()  { modal.classList.add('open'); }
+    function closeModal() { modal.classList.remove('open'); clearMsg(); }
+
+    function clearMsg() {
+        var m = document.getElementById('wdEditMsg');
+        if (!m) return;
+        m.className = 'wd-alert';
+        m.textContent = '';
+    }
+    function showMsg(txt, ok) {
+        var m = document.getElementById('wdEditMsg');
+        if (!m) return;
+        m.textContent = txt;
+        m.className = 'wd-alert show' + (ok ? ' ok' : '');
+    }
+
+    document.getElementById('wdEditClose').addEventListener('click', closeModal);
+    document.getElementById('wdEditCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+
+    // Event delegation — works for both server-rendered and JS-rendered rows
+    listEl.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-edit-item]');
+        if (!btn) return;
+        clearMsg();
+        document.getElementById('wdEditItemId').value  = btn.getAttribute('data-item-id')      || '';
+        document.getElementById('wdEditName').value    = btn.getAttribute('data-item-name')     || '';
+        document.getElementById('wdEditUnit').value    = btn.getAttribute('data-item-unit')     || '';
+        document.getElementById('wdEditUpm').value     = btn.getAttribute('data-item-upm')      || '0';
+        document.getElementById('wdEditEnabled').value = btn.getAttribute('data-item-enabled')  || 'true';
+        openModal();
+    });
+
+    document.getElementById('wdEditSave').addEventListener('click', function() {
+        clearMsg();
+        var itemId  = (document.getElementById('wdEditItemId').value  || '').trim();
+        var name    = (document.getElementById('wdEditName').value    || '').trim();
+        var unit    = (document.getElementById('wdEditUnit').value    || '').trim();
+        var upm     = parseFloat(document.getElementById('wdEditUpm').value);
+        var enabled = document.getElementById('wdEditEnabled').value === 'true';
+
+        if (!itemId)           { showMsg('Missing item id.');              return; }
+        if (!name)             { showMsg('Name is required.');             return; }
+        if (isNaN(upm)||upm<0) { showMsg('Units Per Minute must be \u2265 0.'); return; }
+
+        var saveEl = this;
+        saveEl.classList.add('loading');
+        saveEl.textContent = 'Saving\u2026';
+
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', getAft());
+        fd.append('warehouseId',    WAREHOUSE_ID);
+        fd.append('itemId',         itemId);
+        fd.append('name',           name);
+        fd.append('unitsPerMinute', String(upm));
+        fd.append('isEnabled',      enabled ? 'true' : 'false');
+        fd.append('unit',           unit);
+
+        fetch('?handler=UpdateItem', { method: 'POST', body: fd })
+            .then(function(r) { return r.json().then(function(j){ return { ok: r.ok, status: r.status, json: j }; }); })
+            .then(function(res) {
+                saveEl.classList.remove('loading');
+                saveEl.textContent = 'Save';
+                if (!res.ok || !res.json.success) {
+                    showMsg(res.json.message || ('API error ' + res.status));
+                    return;
+                }
+                showMsg('\u2713 Updated', true);
+                setTimeout(function(){ window.location.reload(); }, 700);
+            })
+            .catch(function(e) {
+                saveEl.classList.remove('loading');
+                saveEl.textContent = 'Save';
+                showMsg('Network error: ' + e.message);
+            });
+    });
+
+    /* ── Wizard ─────────────────────────────────────────────── */
+    var currentStep  = 1;
+    var selectedType = null; // 1 = final, 0 = ingredient
+
+    var typeFinal      = document.getElementById('wdTypeFinal');
+    var typeIngredient = document.getElementById('wdTypeIngredient');
+    var next1          = document.getElementById('wdNext1');
+
+    function showAlert(msg, ok) {
+        var el = document.getElementById('wdWizardAlert');
+        el.textContent = msg;
+        el.className = 'wd-alert show' + (ok ? ' ok' : '');
+    }
+    function clearAlert() {
+        var el = document.getElementById('wdWizardAlert');
+        el.className = 'wd-alert';
+        el.textContent = '';
+    }
+
+    function setStep(n) {
+        currentStep = n;
+        [1,2,3].forEach(function(i) {
+            document.getElementById('wdStep' + i).classList.toggle('active', i === n);
+            var ind = document.getElementById('wdSInd' + i);
+            ind.classList.remove('active','done');
+            if (i < n)       ind.classList.add('done');
+            else if (i === n) ind.classList.add('active');
+        });
+        clearAlert();
+        if (n === 3) updateReview();
+    }
+
+    [typeFinal, typeIngredient].forEach(function(card) {
+        card.addEventListener('click', function() {
+            [typeFinal, typeIngredient].forEach(function(c) { c.classList.remove('selected'); });
+            this.classList.add('selected');
+            selectedType = parseInt(this.dataset.value, 10);
+            next1.disabled = false;
+            var isFinal = selectedType === 1;
+            document.getElementById('wdProductionSection').style.display  = isFinal ? '' : 'none';
+            document.getElementById('wdIngredientSection').style.display  = isFinal ? 'none' : '';
+        });
+    });
+
+    next1.addEventListener('click', function() {
+        if (selectedType === null) { showAlert('Please select a type.'); return; }
+        setStep(2);
+    });
+    document.getElementById('wdPrev2').addEventListener('click', function() { setStep(1); });
+    document.getElementById('wdNext2').addEventListener('click', function() { setStep(3); });
+    document.getElementById('wdPrev3').addEventListener('click', function() {
+        document.getElementById('wdReview').style.display = 'none';
+        setStep(2);
+    });
+
+    function updateReview() {
+        var isFinal = selectedType === 1;
+        var name = document.getElementById('wdItemName').value.trim();
+        var sku  = document.getElementById('wdSku').value.trim();
+        var qty  = parseFloat(document.getElementById('wdInitQty').value) || 0;
+        var upm  = isFinal ? (parseFloat(document.getElementById('wdUpm').value) || 0) : 0;
+        var unit = isFinal
+            ? document.getElementById('wdUnit').value.trim()
+            : document.getElementById('wdUnitIngredient').value.trim();
+
+        document.getElementById('rvType').textContent = isFinal ? 'Final Product' : 'Ingredient';
+        document.getElementById('rvUpm').textContent  = isFinal ? upm + ' UPM' : 'N/A';
+        document.getElementById('rvUnit').textContent = unit || '—';
+        document.getElementById('rvName').textContent = name || '—';
+        document.getElementById('rvSku').textContent  = sku  || '—';
+        document.getElementById('rvQty').textContent  = qty;
+        document.getElementById('wdReview').style.display = '';
+    }
+
+    ['wdItemName','wdSku','wdInitQty','wdUpm','wdUnit','wdUnitIngredient'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('input', function() { if (currentStep === 3) updateReview(); });
+    });
+
+    document.getElementById('wdSubmit').addEventListener('click', function() {
+        var name    = document.getElementById('wdItemName').value.trim();
+        var sku     = document.getElementById('wdSku').value.trim();
+        var qty     = parseFloat(document.getElementById('wdInitQty').value) || 0;
+        var isFinal = selectedType === 1;
+        var upm     = isFinal ? (parseFloat(document.getElementById('wdUpm').value) || 0) : 0;
+        var unit    = isFinal
+            ? document.getElementById('wdUnit').value.trim()
+            : document.getElementById('wdUnitIngredient').value.trim();
+
+        if (!name) { showAlert('Item name is required.'); return; }
+        if (!sku)  { showAlert('SKU is required.');       return; }
+
+        var submitBtn = document.getElementById('wdSubmit');
+        submitBtn.classList.add('loading');
+        submitBtn.textContent = 'Adding\u2026';
+
+        var fd = new FormData();
+        fd.append('__RequestVerificationToken', getAft());
+        fd.append('warehouseId',         WAREHOUSE_ID);
+        fd.append('name',                name);
+        fd.append('sku',                 sku);
+        fd.append('itemCategory',        String(selectedType));
+        fd.append('initialQuantity',     String(qty));
+        fd.append('unitsPerMinute',      String(upm));
+        fd.append('isProductionEnabled', isFinal ? 'true' : 'false');
+        fd.append('unit',                unit);
+
+        fetch('?handler=CreateItem', { method: 'POST', body: fd })
+            .then(function(r) { return r.json(); })
+            .then(function(j) {
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Item';
+
+                if (!j.success) { showAlert(j.message || 'Error creating item.'); return; }
+
+                var created = j.item || {};
+                itemList.push({
+                    name:             created.name           || name,
+                    sku:              created.sku            || sku,
+                    itemCategory:     created.itemCategory   !== undefined ? created.itemCategory   : selectedType,
+                    initialQuantity:  created.initialQuantity !== undefined ? created.initialQuantity : qty,
+                    unitsPerMinute:   created.unitsPerMinute  !== undefined ? created.unitsPerMinute  : upm,
+                    unit:             created.unit            || '',
+                    itemId:           created.itemId          || '',
+                    isProductionEnabled: isFinal
+                });
+
+                // Reset fake simulation baseline when inventory changes
+                __prodT0 = Date.now();
+
+                renderItems();
+                showAlert('\u2713 ' + (j.message || 'Item added!'), true);
+
+                setTimeout(function() {
+                    resetWizard();
+                    document.getElementById('wdTabList').click();
+                }, 1200);
+            })
+            .catch(function(e) {
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = 'Add Item';
+                showAlert('Network error: ' + e.message);
+            });
+    });
+
+    function resetWizard() {
+        selectedType = null;
+        [typeFinal, typeIngredient].forEach(function(c) { c.classList.remove('selected'); });
+        next1.disabled = true;
+        document.getElementById('wdUpm').value             = '';
+        document.getElementById('wdUnit').value            = '';
+        document.getElementById('wdUnitIngredient').value  = '';
+        document.getElementById('wdItemName').value        = '';
+        document.getElementById('wdSku').value             = '';
+        document.getElementById('wdInitQty').value         = '0';
+        document.getElementById('wdReview').style.display  = 'none';
+        document.getElementById('wdProductionSection').style.display = '';
+        document.getElementById('wdIngredientSection').style.display = 'none';
+        setStep(1);
+    }
+
+    /* ── Init ───────────────────────────────────────────────── */
+    renderItems();
+
+    // Update visual simulated quantities every second.
+    // Note: this does not persist to server; reloading resets to real qty.
+    setInterval(updateSimulatedQuantities, 1000);
+
+})();
+</script>
+}
+

@@ -1,8 +1,10 @@
+using DeliveryWebLoL.DTO.Auth;
 using Microsoft.AspNetCore.Mvc;
 using DeliveryWebLoL.Service.Interfaces;
 using DeliveryWebLoL.Models;
-using DeliveryWebLoL.DTO.Auth;
 using DeliveryWebLoL.Service;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace DeliveryWebLoL.Controllers
 {
@@ -144,6 +146,23 @@ namespace DeliveryWebLoL.Controllers
 
             await _userService.LogoutAsync(user);
             return Ok(new { message = "Logged out" });
+        }
+
+        [HttpPost("claim-affiliation")]
+        [Authorize]
+        public async Task<IActionResult> ClaimAffiliation([FromBody] AuthRequest.ClaimAffiliationRequest req)
+        {
+            if (req == null || req.AffiliateLocationCode == Guid.Empty) return BadRequest();
+
+            // Our JWT uses "sub" as the user id.
+            var userIdStr = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId) || userId == Guid.Empty)
+                return Unauthorized();
+
+            var ok = await _userService.ClaimAffiliateAffiliationAsync(userId, req.AffiliateLocationCode);
+            if (!ok) return BadRequest(new { success = false, message = "Unable to claim affiliation." });
+
+            return Ok(new { success = true, message = "Affiliation claimed." });
         }
     }
 }

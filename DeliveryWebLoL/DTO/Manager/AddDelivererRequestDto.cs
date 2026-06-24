@@ -5,10 +5,11 @@ namespace DeliveryWebLoL.DTO.Manager
         // Location (warehouse) owned by the manager to associate the deliverer with
         public Guid WarehouseLocationId { get; set; }
 
-        // Deliverer user account to assign. This user should have Role == Driver.
-        public Guid DelivererUserId { get; set; }
+        // OPTIONAL: Deliverer user account to assign.
+        // If omitted, the API will only create the Affiliate and link it to the warehouse.
+        public Guid? DelivererUserId { get; set; }
 
-        // Optional: affiliate primary location. If not provided, can be created later.
+        // Optional: affiliate primary location. If not provided, a placeholder location will be created.
         public Guid? AffiliatePrimaryLocationId { get; set; }
     }
 }

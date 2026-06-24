@@ -72,6 +72,68 @@ namespace DeliveryWebLoL.Service.Repositories
             await _db.SaveChangesAsync();
         }
 
+        public async Task ApplyProductionForLocationAsync(Guid locationId, DateTime? nowUtc = null)
+        {
+            var now = nowUtc ?? DateTime.UtcNow;
+
+            // Load all enabled production rules for this location
+            var rules = await _db.LocationItemProductions
+                .Where(p => p.LocationID == locationId && p.IsEnabled)
+                .ToListAsync();
+
+            if (rules.Count == 0)
+                return;
+
+            var itemIds = rules.Select(r => r.ItemID).Distinct().ToList();
+
+            // Load existing inventories for all items in this location
+            var inventories = await _db.Inventories
+                .Where(i => i.LocationID == locationId && itemIds.Contains(i.ItemID))
+                .ToListAsync();
+
+            var inventoryByItem = inventories.ToDictionary(i => i.ItemID, i => i);
+
+            foreach (var rule in rules)
+            {
+                if (rule.LastCalculatedAt > now)
+                {
+                    rule.LastCalculatedAt = now;
+                    continue;
+                }
+
+                var elapsedMinutes = (decimal)(now - rule.LastCalculatedAt).TotalMinutes;
+                if (elapsedMinutes <= 0)
+                    continue;
+
+                var produced = elapsedMinutes * rule.UnitsPerMinute;
+
+                // Always move LastCalculatedAt forward if time advanced
+                rule.LastCalculatedAt = now;
+
+                if (produced <= 0)
+                    continue;
+
+                if (!inventoryByItem.TryGetValue(rule.ItemID, out var inv))
+                {
+                    inv = new Inventory
+                    {
+                        InventoryID = Guid.NewGuid(),
+                        LocationID = locationId,
+                        ItemID = rule.ItemID,
+                        Quantity = 0,
+                        LastUpdated = now
+                    };
+                    await _db.Inventories.AddAsync(inv);
+                    inventoryByItem[rule.ItemID] = inv;
+                }
+
+                inv.Quantity += produced;
+                inv.LastUpdated = now;
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
         public async Task UpdateProductionRateAsync(Guid locationId, Guid itemId, decimal unitsPerMinute, bool isEnabled, DateTime? nowUtc = null)
         {
             var now = nowUtc ?? DateTime.UtcNow;

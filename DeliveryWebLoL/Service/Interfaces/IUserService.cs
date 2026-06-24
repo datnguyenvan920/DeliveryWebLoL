@@ -10,6 +10,9 @@ namespace DeliveryWebLoL.Service.Interfaces
         Task UpdateRefreshTokenAsync(User user, string refreshToken, DateTime expiry);
         Task<User?> RegisterAsync(string username, string password, string phonenumber, string? email, int role);
         Task<bool> UpdateRoleAsync(User user, UserRole newRole, string extraData);
+
+        Task<bool> ClaimAffiliateAffiliationAsync(Guid userId, Guid affiliateLocationCode);
+
         Task LogoutAsync(User user);
     }
 }

@@ -67,6 +67,14 @@ namespace DeliveryWebLoL
             // register services
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IManagerService, ManagerService>();
+            builder.Services.AddScoped<IProductionService, ProductionService>();
+            builder.Services.AddScoped<IManagerItemService, ManagerItemService>();
+            builder.Services.AddScoped<IWarehouseInventoryService, WarehouseInventoryService>();
+            builder.Services.AddScoped<IWarehouseItemUpdateService, WarehouseItemUpdateService>();
+            builder.Services.AddScoped<IAffiliateService, AffiliateService>();
+            builder.Services.AddScoped<DeliveryWebLoL.Service.Interfaces.IManagerOrderService, DeliveryWebLoL.Service.Repositories.ManagerOrderService>();
+            builder.Services.AddScoped<DeliveryWebLoL.Service.Interfaces.IOrderApprovalService, DeliveryWebLoL.Service.Repositories.OrderApprovalService>();
+            builder.Services.AddScoped<DeliveryWebLoL.Service.Interfaces.IDriverOrderService, DeliveryWebLoL.Service.Repositories.DriverOrderService>();
 
             var app = builder.Build();
 

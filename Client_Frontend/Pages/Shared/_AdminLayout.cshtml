@@ -1,0 +1,261 @@
+@*
+    _AdminLayout.cshtml — Shared shell for Admin pages.
+    Dark gaming aesthetic matching the project design system.
+    Sidebar: Management + Analytics sections.
+*@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    var username = HttpContextAccessor.HttpContext?.Session.GetString("username") ?? "Admin";
+    var initial  = username.Length > 0 ? username[0].ToString().ToUpper() : "A";
+    var curPage  = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="DeliveryWebLoL Admin Portal" />
+    <title>@ViewData["Title"] — DeliveryWebLoL</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/auth.css"      asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <meta name="api-base" content="@(Configuration["ApiBaseUrl"] ?? "")" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body.al-shell {
+            font-family: 'Chakra Petch', sans-serif;
+            background: #0B0E12;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        /* ── Navbar ── */
+        .al-navbar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: #12161D; border-bottom: 1px solid #1C222B;
+            display: flex; align-items: center; padding: 0 20px; gap: 16px; z-index: 200;
+        }
+        .al-hamburger {
+            display: none; width: 36px; height: 36px; align-items: center; justify-content: center;
+            border-radius: 8px; background: #171C25; border: 1px solid #1C222B;
+            color: rgba(255,255,255,0.55); cursor: pointer;
+            transition: color 200ms ease, border-color 200ms ease; flex-shrink: 0;
+        }
+        .al-hamburger:hover { color: #FF4D6A; border-color: rgba(255,77,106,0.35); }
+        .al-brand {
+            display: flex; align-items: center; gap: 10px; min-width: 230px; text-decoration: none;
+        }
+        .al-brand-mark {
+            width: 36px; height: 36px; background: #FF4D6A; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Russo One', sans-serif; font-size: 13px; color: #fff; font-weight: 900;
+            box-shadow: 0 0 12px rgba(255,77,106,0.4); flex-shrink: 0;
+        }
+        .al-brand-name { font-family: 'Russo One', sans-serif; font-size: 14px; color: #fff; letter-spacing: 0.03em; line-height: 1.1; }
+        .al-brand-sub  { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.04em; text-transform: uppercase; }
+        .al-navbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+        .al-role-badge {
+            font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+            padding: 3px 10px; border-radius: 20px; background: #FF4D6A; color: #fff;
+        }
+        .al-icon-btn {
+            width: 34px; height: 34px; border-radius: 8px; background: #171C25;
+            border: 1px solid #1C222B; color: rgba(255,255,255,0.55);
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            text-decoration: none; transition: color 200ms ease, border-color 200ms ease;
+        }
+        .al-icon-btn:hover { color: #FF4D6A; border-color: rgba(255,77,106,0.35); }
+        /* Avatar */
+        .al-avatar-wrap { position: relative; }
+        .al-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, #FF4D6A, #c41d3a);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Russo One', sans-serif; font-size: 13px; color: #fff;
+            cursor: pointer; border: none; box-shadow: 0 0 10px rgba(255,77,106,0.3);
+            transition: box-shadow 200ms ease;
+        }
+        .al-avatar:hover { box-shadow: 0 0 18px rgba(255,77,106,0.55); }
+        .al-dropdown {
+            position: absolute; top: calc(100% + 10px); right: 0; min-width: 200px;
+            background: #12161D; border: 1px solid #1C222B; border-radius: 12px; padding: 6px;
+            box-shadow: 0 16px 50px rgba(0,0,0,0.65);
+            opacity: 0; pointer-events: none; transform: translateY(6px);
+            transition: opacity 200ms ease, transform 200ms ease; z-index: 300;
+        }
+        .al-avatar-wrap.open .al-dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
+        .al-dropdown-header { padding: 10px 12px 8px; border-bottom: 1px solid #1C222B; margin-bottom: 4px; }
+        .al-dropdown-name { font-weight: 700; font-size: 13px; color: #fff; }
+        .al-dropdown-sub  { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+        .al-dd-item {
+            display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px;
+            font-size: 13px; color: rgba(255,255,255,0.7); text-decoration: none; cursor: pointer;
+            transition: background 150ms ease, color 150ms ease;
+            background: none; border: none; width: 100%; text-align: left;
+        }
+        .al-dd-item:hover { background: #1e2530; color: #fff; }
+        .al-dd-item.logout:hover { background: rgba(255,77,106,0.1); color: #FF4D6A; }
+        .al-dd-divider { height: 1px; background: #1C222B; margin: 4px 6px; }
+        /* ── Sidebar ── */
+        .al-sidebar {
+            position: fixed; top: 60px; left: 0; bottom: 0; width: 230px;
+            background: #12161D; border-right: 1px solid #1C222B;
+            padding: 20px 10px; display: flex; flex-direction: column; gap: 3px;
+            overflow-y: auto; z-index: 100;
+            transition: transform 350ms cubic-bezier(0.22,1,0.36,1);
+        }
+        .al-sidebar::-webkit-scrollbar { width: 3px; }
+        .al-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+        .al-section-label {
+            font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+            color: rgba(255,255,255,0.28); padding: 14px 10px 6px;
+        }
+        .al-nav-link {
+            display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+            border-radius: 8px; color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500;
+            text-decoration: none; cursor: pointer;
+            transition: background 180ms ease, color 180ms ease, border-left-color 180ms ease;
+            border-left: 2px solid transparent; position: relative;
+        }
+        .al-nav-link svg { flex-shrink: 0; opacity: 0.8; }
+        .al-nav-link:hover { background: #1e2530; color: #fff; }
+        .al-nav-link.active {
+            background: rgba(255,77,106,0.1); color: #FF4D6A;
+            border-left-color: #FF4D6A; font-weight: 700;
+        }
+        .al-nav-link.active svg { opacity: 1; }
+        .al-nav-link.disabled { opacity: 0.35; pointer-events: none; }
+        /* ── Main ── */
+        .al-main { margin-left: 230px; padding-top: 60px; flex: 1; min-height: 100vh; background: #0B0E12; }
+        @@media (max-width: 768px) {
+            .al-hamburger { display: flex; }
+            .al-brand { min-width: unset; }
+            .al-sidebar { transform: translateX(-230px); }
+            .al-sidebar.open { transform: translateX(0); }
+            .al-main { margin-left: 0; }
+            .al-role-badge { display: none; }
+        }
+    </style>
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="al-shell">
+
+<nav class="al-navbar" role="navigation" aria-label="Admin navigation">
+    <button class="al-hamburger" id="alHamburger" aria-label="Toggle sidebar" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
+    <a class="al-brand" asp-page="/AdminDashboard">
+        <div class="al-brand-mark">DW</div>
+        <div>
+            <div class="al-brand-name">DeliveryWebLoL</div>
+            <div class="al-brand-sub">Admin Portal</div>
+        </div>
+    </a>
+    <div class="al-navbar-right">
+        <span class="al-role-badge">Admin</span>
+        <button class="al-icon-btn" title="Notifications" aria-label="Notifications">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+        </button>
+        <div class="al-avatar-wrap" id="alAvatarWrap">
+            <button class="al-avatar" id="alAvatarBtn" title="@username" aria-haspopup="true" aria-expanded="false">@initial</button>
+            <div class="al-dropdown" id="alDropdown" role="menu">
+                <div class="al-dropdown-header">
+                    <div class="al-dropdown-name">@username</div>
+                    <div class="al-dropdown-sub">Admin · Signed in</div>
+                </div>
+                <a class="al-dd-item" asp-page="/AdminDashboard" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    User Management
+                </a>
+                <div class="al-dd-divider"></div>
+                <form method="post" asp-page="/Logout">
+                    <button type="submit" class="al-dd-item logout" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Sign Out
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<aside class="al-sidebar" id="alSidebar" role="complementary" aria-label="Admin navigation">
+    <div class="al-section-label">Management</div>
+    <a class="al-nav-link @(curPage == "/AdminDashboard" ? "active" : "")" asp-page="/AdminDashboard">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        User List
+    </a>
+    <div class="al-section-label">Analytics</div>
+    <a class="al-nav-link active" href="#" onclick="return false;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Reports
+    </a>
+    <div class="al-section-label">System</div>
+    <a class="al-nav-link disabled" href="#" aria-disabled="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Settings
+    </a>
+    <div style="margin-top:auto;padding-top:16px;border-top:1px solid #1C222B;">
+        <form method="post" asp-page="/Logout">
+            <button type="submit" class="al-nav-link" style="width:100%;color:rgba(255,77,106,0.75);border:none;background:none;cursor:pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Sign Out
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="al-main" id="alMain">
+    @RenderBody()
+</main>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script>
+    window.__apiBase__ = @System.Text.Json.JsonSerializer.Serialize(Configuration["ApiBaseUrl"] ?? "");
+    (function () {
+        var avatarWrap = document.getElementById('alAvatarWrap');
+        var avatarBtn  = document.getElementById('alAvatarBtn');
+        avatarBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var open = avatarWrap.classList.toggle('open');
+            avatarBtn.setAttribute('aria-expanded', open);
+        });
+        document.addEventListener('click', function() {
+            avatarWrap.classList.remove('open');
+            avatarBtn.setAttribute('aria-expanded', 'false');
+        });
+        var hamburger = document.getElementById('alHamburger');
+        var sidebar   = document.getElementById('alSidebar');
+        hamburger.addEventListener('click', function() {
+            var open = sidebar.classList.toggle('open');
+            hamburger.setAttribute('aria-expanded', open);
+        });
+        document.getElementById('alMain').addEventListener('click', function() {
+            if (window.innerWidth <= 768) { sidebar.classList.remove('open'); hamburger.setAttribute('aria-expanded','false'); }
+        });
+    })();
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

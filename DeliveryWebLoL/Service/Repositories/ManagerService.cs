@@ -136,6 +136,88 @@ namespace DeliveryWebLoL.Service.Repositories
             };
         }
 
+        public async Task<PageResponseDto<ManagerDelivererDto>> GetAffiliateUsersForOwnedWarehousesAsync(Guid managerUserId, ManagerListRequestDto req)
+        {
+            req ??= new ManagerListRequestDto();
+
+            var ownedWarehouseIdsQuery = _db.Locations
+                .AsNoTracking()
+                .Where(l => l.OwnerUserID == managerUserId && l.LocationType == LocationType.Warehouse)
+                .Select(l => l.LocationID);
+
+            if (req.WarehouseLocationId.HasValue)
+            {
+                ownedWarehouseIdsQuery = ownedWarehouseIdsQuery.Where(id => id == req.WarehouseLocationId.Value);
+            }
+
+            var ownedWarehouseIds = await ownedWarehouseIdsQuery.ToListAsync();
+            if (ownedWarehouseIds.Count == 0)
+            {
+                return new PageResponseDto<ManagerDelivererDto>
+                {
+                    Items = Array.Empty<ManagerDelivererDto>(),
+                    Total = 0,
+                    Page = req.Page,
+                    PageSize = req.PageSize
+                };
+            }
+
+            var affiliationIds = await _db.AffiliateWarehouses
+                .AsNoTracking()
+                .Where(aw => ownedWarehouseIds.Contains(aw.WarehouseLocationId))
+                .Select(aw => aw.AffiliationId)
+                .Distinct()
+                .ToListAsync();
+
+            if (affiliationIds.Count == 0)
+            {
+                return new PageResponseDto<ManagerDelivererDto>
+                {
+                    Items = Array.Empty<ManagerDelivererDto>(),
+                    Total = 0,
+                    Page = req.Page,
+                    PageSize = req.PageSize
+                };
+            }
+
+            var affiliationIdStrings = affiliationIds.Select(id => id.ToString()).ToList();
+
+            var query = _db.Users
+                .AsNoTracking()
+                .Where(u => u.Role == UserRole.Affiliate && u.AffiliationId != null && affiliationIdStrings.Contains(u.AffiliationId));
+
+            if (!string.IsNullOrWhiteSpace(req.Search))
+            {
+                var s = req.Search.Trim();
+                query = query.Where(u => u.Username.Contains(s) || (u.Email != null && u.Email.Contains(s)) || (u.ContactPhone != null && u.ContactPhone.Contains(s)));
+            }
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(u => u.Username)
+                .Skip(req.Skip)
+                .Take(req.Take)
+                .Select(u => new ManagerDelivererDto
+                {
+                    UserID = u.UserID,
+                    Username = u.Username,
+                    ContactPhone = u.ContactPhone,
+                    Email = u.Email,
+                    AffiliationId = u.AffiliationId,
+                    Role = (int)u.Role
+                })
+                .ToListAsync();
+
+            return new PageResponseDto<ManagerDelivererDto>
+            {
+                Items = items,
+                Total = total,
+                Page = req.Page,
+                PageSize = req.PageSize
+            };
+        }
+
         public async Task<ManagerWarehouseDto> AddWarehouseAsync(Guid managerUserId, AddWarehouseRequestDto req)
         {
             if (req == null) throw new ArgumentNullException(nameof(req));
@@ -168,27 +250,43 @@ namespace DeliveryWebLoL.Service.Repositories
         {
             if (req == null) throw new ArgumentNullException(nameof(req));
             if (req.WarehouseLocationId == Guid.Empty) throw new ArgumentException("WarehouseLocationId is required.");
-            if (req.DelivererUserId == Guid.Empty) throw new ArgumentException("DelivererUserId is required.");
 
             // Validate warehouse owned by manager
             var warehouseExists = await _db.Locations
                 .AsNoTracking()
-                .AnyAsync(l => l.LocationID == req.WarehouseLocationId && l.OwnerUserID == managerUserId && l.LocationType == LocationType.Warehouse);
+                .AnyAsync(l => l.LocationID == req.WarehouseLocationId
+                    && l.OwnerUserID == managerUserId
+                    && l.LocationType == LocationType.Warehouse);
 
             if (!warehouseExists) return false;
 
-            // Validate deliverer user exists and is Driver
-            var deliverer = await _db.Users.SingleOrDefaultAsync(u => u.UserID == req.DelivererUserId);
-            if (deliverer == null) return false;
-            if (deliverer.Role != UserRole.Driver) return false;
+            // Do not allow duplicate usage of a warehouse in AffiliateWarehouses
+            // (i.e., only one affiliate may be linked to a given warehouse)
+            var warehouseAlreadyLinked = await _db.AffiliateWarehouses
+                .AsNoTracking()
+                .AnyAsync(aw => aw.WarehouseLocationId == req.WarehouseLocationId);
 
-            // Prevent double-assigning: deliverer already has an affiliation
-            if (!string.IsNullOrWhiteSpace(deliverer.AffiliationId)) return false;
+            if (warehouseAlreadyLinked) return false;
+
+            // If a deliverer id is provided, validate & assign. Otherwise create affiliate only.
+            User? deliverer = null;
+            if (req.DelivererUserId.HasValue)
+            {
+                if (req.DelivererUserId.Value == Guid.Empty) return false;
+
+                deliverer = await _db.Users.SingleOrDefaultAsync(u => u.UserID == req.DelivererUserId.Value);
+                if (deliverer == null) return false;
+                if (deliverer.Role != UserRole.Driver) return false;
+
+                // Prevent double-assigning: deliverer already has an affiliation
+                if (!string.IsNullOrWhiteSpace(deliverer.AffiliationId)) return false;
+            }
 
             // Create affiliate primary location if provided, otherwise create a placeholder affiliate location
             Guid affiliatePrimaryLocationId;
             if (req.AffiliatePrimaryLocationId.HasValue)
             {
+                if (req.AffiliatePrimaryLocationId.Value == Guid.Empty) return false;
                 affiliatePrimaryLocationId = req.AffiliatePrimaryLocationId.Value;
 
                 // Ensure location exists
@@ -197,12 +295,14 @@ namespace DeliveryWebLoL.Service.Repositories
             }
             else
             {
-                // Create a minimal affiliate location owned by this manager for now.
+                var suffix = deliverer != null ? deliverer.Username : DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+
+                // Create a minimal affiliate location owned by this manager.
                 var affiliateLocation = new Location
                 {
                     LocationID = Guid.NewGuid(),
                     OwnerUserID = managerUserId,
-                    Name = $"Affiliate-{deliverer.Username}",
+                    Name = $"Affiliate-{suffix}",
                     Address = null,
                     Latitude = null,
                     Longitude = null,
@@ -223,7 +323,7 @@ namespace DeliveryWebLoL.Service.Repositories
             await _db.Affiliates.AddAsync(affiliate);
             await _db.SaveChangesAsync();
 
-            // Link affiliate to selected warehouse (many-to-many join)
+            // Link affiliate to selected warehouse
             var link = new AffiliateWarehouse
             {
                 AffiliationId = affiliate.AffiliationId,
@@ -232,12 +332,53 @@ namespace DeliveryWebLoL.Service.Repositories
 
             await _db.AffiliateWarehouses.AddAsync(link);
 
-            // Assign deliverer to this affiliate affiliation
-            deliverer.AffiliationId = affiliate.AffiliationId.ToString();
+            // Optionally assign deliverer to this affiliate affiliation
+            if (deliverer != null)
+            {
+                deliverer.AffiliationId = affiliate.AffiliationId.ToString();
+            }
 
             await _db.SaveChangesAsync();
-
             return true;
+        }
+
+        public async Task<bool> UpdateWarehouseAsync(Guid managerUserId, UpdateWarehouseRequestDto req)
+        {
+            if (req == null) throw new ArgumentNullException(nameof(req));
+            if (req.WarehouseLocationId == Guid.Empty) throw new ArgumentException("WarehouseLocationId is required.");
+            if (string.IsNullOrWhiteSpace(req.Name)) throw new ArgumentException("Name is required.");
+
+            var loc = await _db.Locations.SingleOrDefaultAsync(l =>
+                l.LocationID == req.WarehouseLocationId &&
+                l.OwnerUserID == managerUserId &&
+                l.LocationType == LocationType.Warehouse);
+
+            if (loc == null) return false;
+
+            loc.Name = req.Name.Trim();
+            loc.Address = string.IsNullOrWhiteSpace(req.Address) ? null : req.Address.Trim();
+            loc.Latitude = req.Latitude;
+            loc.Longitude = req.Longitude;
+
+            _db.Locations.Update(loc);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IReadOnlyList<Guid>> GetOwnedWarehouseIdsWithAffiliateWarehouseLinkAsync(Guid managerUserId)
+        {
+            // Warehouses owned by manager, filtered to only those with an AffiliateWarehouse row.
+            return await _db.Locations
+                .AsNoTracking()
+                .Where(l => l.OwnerUserID == managerUserId && l.LocationType == LocationType.Warehouse)
+                .Join(
+                    _db.AffiliateWarehouses.AsNoTracking(),
+                    l => l.LocationID,
+                    aw => aw.WarehouseLocationId,
+                    (l, aw) => l.LocationID)
+                .Distinct()
+                .OrderBy(id => id)
+                .ToListAsync();
         }
     }
 }

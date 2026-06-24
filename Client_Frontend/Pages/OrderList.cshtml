@@ -1,0 +1,289 @@
+@page
+@model Client_Frontend.Pages.OrderListModel
+@{
+    ViewData["Title"] = "Orders";
+    Layout = "_ManagerLayout";
+}
+
+@section Head {
+<style>
+/* Page shell */
+.ol-page { padding: 28px 28px 60px; }
+
+.ol-header { display:flex; align-items:flex-end; justify-content:space-between; gap: 16px; flex-wrap:wrap; margin-bottom: 18px; }
+.ol-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    color: #fff;
+}
+.ol-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+/* Panel */
+.ol-panel {
+    background: #12161D;
+    border: 1px solid #1C222B;
+    border-radius: 14px;
+    overflow: hidden;
+}
+.ol-panel-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid #1C222B;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+}
+.ol-panel-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 13.5px;
+    letter-spacing: 0.03em;
+    color: #fff;
+}
+
+/* Filters */
+.ol-tools { display:flex; align-items:center; gap: 10px; flex-wrap:wrap; }
+.ol-input {
+    background: #0B0E12;
+    border: 1px solid #1C222B;
+    border-radius: 10px;
+    color: #fff;
+    padding: 9px 12px;
+    font-size: 13px;
+    outline: none;
+    min-width: 220px;
+}
+.ol-input:focus { border-color:#F5C71B; box-shadow:0 0 0 3px rgba(245,199,27,0.1); }
+
+.ol-chip {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(245,199,27,0.22);
+    background: rgba(245,199,27,0.10);
+    color: rgba(245,199,27,0.85);
+}
+
+/* Table */
+.ol-table-wrap { overflow:auto; }
+.ol-table { width:100%; border-collapse: collapse; }
+.ol-th, .ol-td { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align:left; }
+.ol-th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.35);
+    background: rgba(11,14,18,0.55);
+}
+.ol-td { font-size: 13px; color: rgba(255,255,255,0.75); }
+.ol-row:hover { background: #1e2530; }
+
+.ol-badge {
+    display:inline-flex;
+    align-items:center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.ol-badge.new { background: rgba(59,130,246,0.10); border-color: rgba(59,130,246,0.25); color: rgba(96,165,250,0.95); }
+.ol-badge.inprog { background: rgba(245,199,27,0.10); border-color: rgba(245,199,27,0.25); color: rgba(245,199,27,0.95); }
+.ol-badge.done { background: rgba(34,197,94,0.10); border-color: rgba(34,197,94,0.25); color: rgba(74,222,128,0.95); }
+.ol-badge.cancel { background: rgba(255,77,106,0.10); border-color: rgba(255,77,106,0.25); color: rgba(255,77,106,0.95); }
+
+.ol-empty { padding: 44px 18px; text-align:center; color: rgba(255,255,255,0.30); }
+.ol-empty svg { opacity: 0.25; display:block; margin: 0 auto 10px; }
+
+</style>
+}
+
+<div class="ol-page">
+    @Html.AntiForgeryToken()
+    <div class="ol-header">
+        <div>
+            <div class="ol-title">Order List</div>
+            <div class="ol-sub">Front-end placeholder (API wiring pending)</div>
+        </div>
+        <div class="ol-chip">@Model.Orders.Count order@(Model.Orders.Count == 1 ? "" : "s")</div>
+    </div>
+
+    <div class="ol-panel">
+        <div class="ol-panel-head">
+            <div class="ol-panel-title">Orders</div>
+            <div class="ol-tools">
+                <input class="ol-input" id="olSearch" type="search" placeholder="Search by ID, customer, status…" />
+            </div>
+        </div>
+
+        <div class="ol-table-wrap">
+            @if (Model.Orders.Count == 0)
+            {
+                <div class="ol-empty">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"/>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                        <circle cx="5.5" cy="18.5" r="2.5"/>
+                        <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                    No orders yet.
+                </div>
+            }
+            else
+            {
+                <table class="ol-table" id="olTable">
+                    <thead>
+                        <tr>
+                            <th class="ol-th">Order ID</th>
+                            <th class="ol-th">Created</th>
+                            <th class="ol-th">Customer</th>
+                            <th class="ol-th">Source</th>
+                            <th class="ol-th">Destination</th>
+                            <th class="ol-th">Status</th>
+                            <th class="ol-th" style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var o in Model.Orders)
+                    {
+                        <tr class="ol-row" data-orderid="@o.OrderId" data-search="@((o.OrderId + " " + o.Customer + " " + o.Status + " " + o.Destination + " " + o.Source).ToLowerInvariant())" style="cursor:pointer;">
+                            <td class="ol-td" style="font-family:monospace;">@o.OrderId</td>
+                            <td class="ol-td">@o.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="ol-td">@o.Customer</td>
+                            <td class="ol-td">@o.Source</td>
+                            <td class="ol-td">@o.Destination</td>
+                            <td class="ol-td"><span class="ol-badge @o.StatusCss">@o.Status</span></td>
+                            <td class="ol-td" style="text-align:right;">
+                                @if (o.Status == "Pending")
+                                {
+                                    <button type="button" class="af-btn-mini" onclick="approveOrder(event,'@o.OrderId')">Approve</button>
+                                }
+                                else
+                                {
+                                    <span style="color:rgba(255,255,255,0.35);font-size:12px;">—</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr class="ol-detail" id="detail-@o.OrderId" style="display:none;">
+                            <td class="ol-td" colspan="7" style="padding-top:0;">
+                                <div style="margin:10px 0 14px; padding:12px 14px; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:#0f131a;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+                                        <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);">Items</div>
+                                        <div style="font-size:12px;color:rgba(255,255,255,0.45);">Source: <strong style="color:#fff;">@o.Source</strong></div>
+                                    </div>
+
+                                    <div style="margin-top:10px; overflow:auto;">
+                                        <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align:left; padding:8px 10px; color:rgba(255,255,255,0.35); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,0.08);">SKU</th>
+                                                    <th style="text-align:left; padding:8px 10px; color:rgba(255,255,255,0.35); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,0.08);">Name</th>
+                                                    <th style="text-align:left; padding:8px 10px; color:rgba(255,255,255,0.35); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,0.08);">Unit</th>
+                                                    <th style="text-align:right; padding:8px 10px; color:rgba(255,255,255,0.35); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,0.08);">Qty</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            @{
+                                                // Find matching order instance from the model by id
+                                            }
+                                            @foreach (var li in o.Items)
+                                            {
+                                                <tr>
+                                                    <td style="padding:9px 10px; border-bottom:1px solid rgba(255,255,255,0.04); font-family:monospace; color:rgba(255,255,255,0.75);">@li.SKU</td>
+                                                    <td style="padding:9px 10px; border-bottom:1px solid rgba(255,255,255,0.04); color:#fff;">@li.Name</td>
+                                                    <td style="padding:9px 10px; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.55);">@(li.Unit ?? "—")</td>
+                                                    <td style="padding:9px 10px; border-bottom:1px solid rgba(255,255,255,0.04); text-align:right; color:#F5C71B; font-family:'Russo One', sans-serif;">@li.Quantity</td>
+                                                </tr>
+                                            }
+                                            @if (o.Items == null || o.Items.Count == 0)
+                                            {
+                                                <tr>
+                                                    <td colspan="4" style="padding:10px; color:rgba(255,255,255,0.35);">No items.</td>
+                                                </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function(){
+    'use strict';
+
+    var search = document.getElementById('olSearch');
+    var table  = document.getElementById('olTable');
+
+    // Search filter
+    if (search && table) {
+        search.addEventListener('input', function(){
+            var q = (search.value || '').trim().toLowerCase();
+            table.querySelectorAll('tbody tr.ol-row').forEach(function(tr){
+                var hay = tr.getAttribute('data-search') || '';
+                var show = (q === '' || hay.indexOf(q) >= 0);
+                tr.style.display = show ? '' : 'none';
+
+                var orderId = tr.getAttribute('data-orderid');
+                var detail = orderId ? document.getElementById('detail-' + orderId) : null;
+                if (detail) detail.style.display = 'none';
+            });
+        });
+
+        // Toggle detail
+        table.querySelectorAll('tbody tr.ol-row').forEach(function(tr){
+            tr.addEventListener('click', function(e){
+                if (e.target.closest('button')) return;
+                var orderId = tr.getAttribute('data-orderid');
+                if (!orderId) return;
+                var detail = document.getElementById('detail-' + orderId);
+                if (!detail) return;
+
+                // Close others
+                table.querySelectorAll('tbody tr.ol-detail').forEach(function(d){ if (d !== detail) d.style.display = 'none'; });
+
+                detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';
+            });
+        });
+    }
+
+    window.approveOrder = async function(ev, orderId){
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        if (!orderId) return;
+        if (!confirm('Approve this order and mark it ReadyForPickup?')) return;
+
+        var fd = new FormData();
+        var tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (tokenEl) fd.append('__RequestVerificationToken', tokenEl.value);
+        fd.append('orderId', orderId);
+
+        try {
+            var res = await fetch('?handler=Approve', { method: 'POST', body: fd });
+            var json = await res.json().catch(function(){ return null; });
+            if (!res.ok || !json || json.success !== true) {
+                alert((json && json.message) ? json.message : ('Error ' + res.status));
+                return;
+            }
+            location.reload();
+        } catch (e) {
+            alert(e.message || String(e));
+        }
+    };
+})();
+</script>
+}

@@ -1,65 +1,1280 @@
 @page
 @model Client_Frontend.Pages.ManagerHomeModel
 @{
-    ViewData["Title"] = "Manager Home";
+    ViewData["Title"] = "Overview — Manager";
     Layout = "_ManagerLayout";
 }
 
-<div class="manager-page">
-    <div class="app-grid">
-        <section class="card">
-            <h3>Warehouses</h3>
+@section Head {
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+/* ═══════════════════════════════════════════════════════════
+   DeliveryWebLoL — ManagerHome Design System
+   Palette  : #0B0E12 bg · #F5C71B yellow · glassmorphism
+   Fonts    : Russo One (headings) + Chakra Petch (body)
+   Prefix   : dw- (avoids Bootstrap collision)
+   ═══════════════════════════════════════════════════════════ */
 
-            @if (Model.Warehouses?.Items == null || Model.Warehouses.Items.Count == 0)
-            {
-                <div class="list-item"><small>No warehouses found.</small></div>
-            }
-            else
-            {
-                @foreach (var w in Model.Warehouses.Items)
-                {
-                    <div class="list-item">
-                        <div style="display:flex;justify-content:space-between;align-items:center">
-                            <div>
-                                <strong>@w.Name</strong>
-                                <div><small>Address: @w.Address</small></div>
-                            </div>
-                            <div><small>ID: @w.LocationID</small></div>
-                        </div>
-                    </div>
-                }
-            }
-        </section>
+/* ── Tokens ─────────────────────────────────────────────── */
+:root {
+  --dw-bg-base:    #0B0E12;
+  --dw-bg-surface: #12161D;
+  --dw-bg-raised:  #171C25;
+  --dw-bg-border:  #1C222B;
+  --dw-bg-hover:   #1e2530;
 
-        <section class="card">
-            <h3>Deliverers</h3>
+  --dw-yellow:     #F5C71B;
+  --dw-yellow-dim: rgba(245,199,27,0.13);
+  --dw-yellow-glow: 0 0 18px rgba(245,199,27,0.5), 0 0 36px rgba(245,199,27,0.2);
 
-            @if (Model.Deliverers?.Items == null || Model.Deliverers.Items.Count == 0)
-            {
-                <div class="list-item"><small>No deliverers found.</small></div>
-            }
-            else
-            {
-                @foreach (var d in Model.Deliverers.Items)
-                {
-                    <div class="list-item">
-                        <div style="display:flex;justify-content:space-between;align-items:center">
-                            <div>
-                                <strong>@d.Username</strong>
-                                <div><small>@(d.Email ?? d.ContactPhone ?? "")</small></div>
-                            </div>
-                            <div><small>Affiliation: @d.AffiliationId</small></div>
-                        </div>
-                    </div>
-                }
-            }
-        </section>
+  --dw-red:        #FF4D6A;
+  --dw-green:      #22c55e;
+  --dw-blue:       #3B82F6;
+
+  --dw-text:       #FFFFFF;
+  --dw-muted:      rgba(255,255,255,0.55);
+  --dw-subtle:     rgba(255,255,255,0.28);
+
+  --dw-t:          200ms ease;
+  --dw-t-slow:     350ms cubic-bezier(0.22,1,0.36,1);
+  --dw-r:          10px;
+  --dw-r-lg:       14px;
+}
+
+/* ── Body override ──────────────────────────────────────── */
+body.manager-shell {
+  font-family: 'Chakra Petch', sans-serif;
+  background: var(--dw-bg-base) !important;
+  color: var(--dw-text) !important;
+}
+
+/* ── Page wrapper ───────────────────────────────────────── */
+.dw-page {
+  padding: 28px 28px 48px;
+  min-height: calc(100vh - 64px);
+}
+
+/* ── Page header ────────────────────────────────────────── */
+.dw-page-header { margin-bottom: 28px; }
+.dw-page-title {
+  font-family: 'Russo One', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.025em;
+  color: var(--dw-text);
+  line-height: 1.2;
+}
+.dw-page-subtitle {
+  font-size: 13px;
+  color: var(--dw-muted);
+  margin-top: 4px;
+}
+
+/* ── KPI stripe ─────────────────────────────────────────── */
+.dw-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.dw-kpi {
+  background: var(--dw-bg-surface);
+  border: 1px solid var(--dw-bg-border);
+  border-radius: var(--dw-r-lg);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--dw-t), box-shadow var(--dw-t);
+  cursor: default;
+}
+.dw-kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--dw-yellow), transparent);
+  opacity: 0.7;
+}
+.dw-kpi:hover {
+  border-color: rgba(245,199,27,0.28);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.dw-kpi-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--dw-yellow-dim);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dw-yellow);
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+.dw-kpi-value {
+  font-family: 'Russo One', sans-serif;
+  font-size: 24px;
+  color: var(--dw-text);
+  line-height: 1.1;
+}
+.dw-kpi-label {
+  font-size: 11px;
+  color: var(--dw-muted);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ── Two-column panel grid ──────────────────────────────── */
+.dw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+@@media (max-width: 900px) {
+  .dw-grid { grid-template-columns: 1fr; }
+  .dw-page { padding: 18px; }
+  .dw-kpi-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Panel card ─────────────────────────────────────────── */
+.dw-panel {
+  background: var(--dw-bg-surface);
+  border: 1px solid var(--dw-bg-border);
+  border-radius: var(--dw-r-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Panel top bar ──────────────────────────────────────── */
+.dw-panel-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--dw-bg-border);
+  flex-shrink: 0;
+}
+.dw-panel-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dw-panel-icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: var(--dw-yellow-dim);
+  border: 1px solid rgba(245,199,27,0.18);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dw-yellow);
+  flex-shrink: 0;
+}
+.dw-panel-title {
+  font-family: 'Russo One', sans-serif;
+  font-size: 14px;
+  color: var(--dw-text);
+  letter-spacing: 0.02em;
+}
+.dw-panel-count {
+  font-size: 11px;
+  color: var(--dw-subtle);
+  margin-top: 2px;
+}
+
+/* Add button */
+.dw-btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--dw-yellow);
+  color: #111;
+  font-family: 'Russo One', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 7px 13px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: filter var(--dw-t), box-shadow var(--dw-t);
+  box-shadow: 0 2px 10px rgba(245,199,27,0.2);
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.dw-btn-add:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 4px 18px rgba(245,199,27,0.4);
+}
+
+/* ── Panel body / scroll area ───────────────────────────── */
+.dw-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 380px;
+}
+.dw-panel-body::-webkit-scrollbar { width: 4px; }
+.dw-panel-body::-webkit-scrollbar-track { background: transparent; }
+.dw-panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+/* ── Empty state ────────────────────────────────────────── */
+.dw-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--dw-subtle);
+  font-size: 13px;
+}
+.dw-empty svg {
+  display: block;
+  margin: 0 auto 10px;
+  opacity: 0.2;
+}
+
+/* ── Row item ───────────────────────────────────────────── */
+.dw-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.035);
+  transition: background var(--dw-t);
+  cursor: default;
+}
+.dw-item:last-child { border-bottom: none; }
+.dw-item:hover { background: var(--dw-bg-hover); }
+
+.dw-avatar {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--dw-bg-raised);
+  border: 1px solid var(--dw-bg-border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dw-yellow);
+  font-family: 'Russo One', sans-serif;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.dw-item-info { flex: 1; min-width: 0; }
+.dw-item-name {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--dw-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dw-item-meta {
+  font-size: 11.5px;
+  color: var(--dw-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dw-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--dw-yellow-dim);
+  color: var(--dw-yellow);
+  border: 1px solid rgba(245,199,27,0.22);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Chakra Petch', monospace;
+  text-transform: uppercase;
+}
+
+/* ── JWT note banner ────────────────────────────────────── */
+.dw-note {
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(245,199,27,0.04);
+  border: 1px solid rgba(245,199,27,0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--dw-subtle);
+  line-height: 1.6;
+}
+.dw-note svg { color: var(--dw-yellow); margin-top: 1px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODAL SYSTEM  (dw- prefix — Bootstrap-safe)
+   ═══════════════════════════════════════════════════════════ */
+
+.dw-modal-wrap {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1060;
+  padding: 16px;
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dw-t-slow);
+}
+.dw-modal-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.dw-modal-wrap.dw-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.dw-modal {
+  position: relative;
+  z-index: 1;
+  background: var(--dw-bg-surface);
+  border: 1px solid rgba(245,199,27,0.28);
+  border-radius: var(--dw-r-lg);
+  padding: 28px 28px 24px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow:
+    0 0 0 1px rgba(245,199,27,0.06) inset,
+    0 0 40px rgba(245,199,27,0.07),
+    0 24px 64px rgba(0,0,0,0.75);
+  transform: translateY(18px) scale(0.98);
+  transition: transform var(--dw-t-slow);
+  /* top shimmer */
+  overflow: hidden;
+}
+.dw-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245,199,27,0.6), transparent);
+}
+.dw-modal-wrap.dw-open .dw-modal {
+  transform: translateY(0) scale(1);
+}
+
+/* Modal top row */
+.dw-modal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+.dw-modal-heading {
+  font-family: 'Russo One', sans-serif;
+  font-size: 17px;
+  color: var(--dw-text);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dw-modal-heading-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--dw-yellow-dim);
+  border: 1px solid rgba(245,199,27,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dw-yellow);
+}
+.dw-modal-x {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--dw-bg-raised);
+  border: 1px solid var(--dw-bg-border);
+  color: var(--dw-muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: color var(--dw-t), border-color var(--dw-t), background var(--dw-t);
+  flex-shrink: 0;
+}
+.dw-modal-x:hover {
+  color: var(--dw-red);
+  border-color: rgba(255,77,106,0.3);
+  background: rgba(255,77,106,0.07);
+}
+
+/* Field */
+.dw-field { margin-bottom: 14px; }
+.dw-field:last-of-type { margin-bottom: 0; }
+
+.dw-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--dw-muted);
+  margin-bottom: 6px;
+}
+.dw-label-opt {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--dw-subtle);
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.dw-input {
+  width: 100%;
+  background: var(--dw-bg-base) !important;
+  border: 1px solid var(--dw-bg-border) !important;
+  border-radius: 8px !important;
+  color: var(--dw-text) !important;
+  padding: 11px 14px !important;
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 13.5px !important;
+  outline: none !important;
+  transition: border-color var(--dw-t), box-shadow var(--dw-t) !important;
+  -webkit-appearance: none;
+}
+.dw-input:focus {
+  border-color: var(--dw-yellow) !important;
+  box-shadow: 0 0 0 3px rgba(245,199,27,0.12) !important;
+}
+.dw-input::placeholder { color: var(--dw-subtle) !important; font-style: italic; }
+
+.dw-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Error alert */
+.dw-alert {
+  display: none;
+  background: rgba(255,77,106,0.1);
+  border: 1px solid rgba(255,77,106,0.28);
+  color: var(--dw-red);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.dw-alert.dw-show { display: block; }
+
+/* Footer */
+.dw-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--dw-bg-border);
+}
+.dw-btn-cancel {
+  padding: 9px 18px;
+  border-radius: 8px;
+  background: var(--dw-bg-raised);
+  border: 1px solid var(--dw-bg-border);
+  color: var(--dw-muted);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color var(--dw-t), border-color var(--dw-t);
+}
+.dw-btn-cancel:hover { color: var(--dw-text); border-color: rgba(255,255,255,0.18); }
+
+.dw-btn-submit {
+  padding: 9px 22px;
+  border-radius: 8px;
+  background: var(--dw-yellow);
+  color: #111;
+  font-family: 'Russo One', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: filter var(--dw-t), box-shadow var(--dw-t);
+  box-shadow: 0 2px 12px rgba(245,199,27,0.25);
+  position: relative;
+  overflow: hidden;
+}
+.dw-btn-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.4s ease;
+}
+.dw-btn-submit:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 4px 20px rgba(245,199,27,0.4);
+}
+.dw-btn-submit:hover::before { transform: translateX(100%); }
+
+/* ── Spinner on submit ──────────────────────────────────── */
+.dw-btn-submit.dw-loading { pointer-events: none; opacity: 0.75; }
+.dw-btn-submit.dw-loading::after {
+  content: '';
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #111;
+  border-radius: 50%;
+  animation: dwSpin 0.7s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+@@keyframes dwSpin { to { transform: rotate(360deg); } }
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@@media (prefers-reduced-motion: reduce) {
+  .dw-modal-wrap, .dw-modal { transition: none !important; }
+  .dw-btn-submit::before { display: none; }
+}
+
+/* ── Action Report (API response viewer) ────────────────── */
+.dw-report {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: min(520px, calc(100vw - 36px));
+  z-index: 1070;
+  background: rgba(18,22,29,0.96);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity var(--dw-t-slow), transform var(--dw-t-slow);
+}
+.dw-report.dw-show { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+.dw-report-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dw-report-title {
+  display:flex; align-items:center; gap:10px;
+  font-family: 'Russo One', sans-serif;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dw-text);
+}
+.dw-report-badge {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--dw-muted);
+}
+.dw-report-badge.dw-ok { color: var(--dw-green); border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.08); }
+.dw-report-badge.dw-err { color: var(--dw-red); border-color: rgba(255,77,106,0.25); background: rgba(255,77,106,0.08); }
+
+.dw-report-x {
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: var(--dw-bg-raised);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--dw-muted);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.dw-report-x:hover { color: var(--dw-red); border-color: rgba(255,77,106,0.3); background: rgba(255,77,106,0.07); }
+
+.dw-report-body { padding: 12px 14px 14px; }
+.dw-report-msg { color: var(--dw-text); font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+.dw-report-meta { color: var(--dw-muted); font-size: 11.5px; margin-bottom: 10px; }
+.dw-report-pre {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #0B0E12;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.78);
+  font-size: 11.5px;
+  line-height: 1.55;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dw-map {
+  height: 260px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: #0B0E12;
+}
+.dw-map-help {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 8px;
+  line-height: 1.35;
+}
+.dw-coord-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Action Report (API response viewer) ────────────────── */
+.dw-report {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: min(520px, calc(100vw - 36px));
+  z-index: 1070;
+  background: rgba(18,22,29,0.96);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity var(--dw-t-slow), transform var(--dw-t-slow);
+}
+.dw-report.dw-show { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+.dw-report-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dw-report-title {
+  display:flex; align-items:center; gap:10px;
+  font-family: 'Russo One', sans-serif;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dw-text);
+}
+.dw-report-badge {
+  font-family: 'Chakra Petch', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--dw-muted);
+}
+.dw-report-badge.dw-ok { color: var(--dw-green); border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.08); }
+.dw-report-badge.dw-err { color: var(--dw-red); border-color: rgba(255,77,106,0.25); background: rgba(255,77,106,0.08); }
+
+.dw-report-x {
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: var(--dw-bg-raised);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--dw-muted);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.dw-report-x:hover { color: var(--dw-red); border-color: rgba(255,77,106,0.3); background: rgba(255,77,106,0.07); }
+
+.dw-report-body { padding: 12px 14px 14px; }
+.dw-report-msg { color: var(--dw-text); font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+.dw-report-meta { color: var(--dw-muted); font-size: 11.5px; margin-bottom: 10px; }
+.dw-report-pre {
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #0B0E12;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.78);
+  font-size: 11.5px;
+  line-height: 1.55;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+</style>
+}
+
+<div class="dw-page">
+
+    <!-- ── Page Header ── -->
+    <div class="dw-page-header">
+        <div class="dw-page-title">Operations Overview</div>
+        <div class="dw-page-subtitle">Manage warehouses and delivery affiliates in real-time</div>
     </div>
 
-    <div style="margin-top:12px; color: rgba(255,255,255,0.6)">
-        <small>
-            Note: these endpoints are protected by JWT ([Authorize]). If the lists are empty due to 401/403,
-            you need to attach the access token (Bearer) in ManagerHomeModel.
-        </small>
+    <!-- ── KPI strip ── -->
+    <div class="dw-kpi-row">
+        <div class="dw-kpi">
+            <div class="dw-kpi-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="dw-kpi-value">@(Model.Warehouses?.Items?.Count ?? 0)</div>
+            <div class="dw-kpi-label">Warehouses</div>
+        </div>
+        <div class="dw-kpi">
+            <div class="dw-kpi-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="dw-kpi-value">@(Model.Deliverers?.Items?.Count ?? 0)</div>
+            <div class="dw-kpi-label">Deliverers</div>
+        </div>
+        <div class="dw-kpi">
+            <div class="dw-kpi-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="dw-kpi-value">—</div>
+            <div class="dw-kpi-label">Active Orders</div>
+        </div>
+        <div class="dw-kpi">
+            <div class="dw-kpi-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="dw-kpi-value">—</div>
+            <div class="dw-kpi-label">Deliveries Today</div>
+        </div>
+    </div>
+
+    <!-- ── Two-column panels ── -->
+    <div class="dw-grid">
+
+        <!-- ═══ WAREHOUSES ═══ -->
+        <div class="dw-panel">
+            <div class="dw-panel-bar">
+                <div class="dw-panel-bar-left">
+                    <div class="dw-panel-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="dw-panel-title">Warehouses</div>
+                        <div class="dw-panel-count">
+                            @if (Model.Warehouses?.Items != null)
+                            {<span>@Model.Warehouses.Items.Count location@(Model.Warehouses.Items.Count == 1 ? "" : "s")</span>}
+                            else
+                            {<span>Loading…</span>}
+                        </div>
+                    </div>
+                </div>
+                <button class="dw-btn-add" id="dwOpenWarehouse" aria-label="Add warehouse">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add
+                </button>
+            </div>
+
+            <div class="dw-panel-body">
+                @if (Model.Warehouses?.Items == null || Model.Warehouses.Items.Count == 0)
+                {
+                    <div class="dw-empty">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        No warehouses found
+                    </div>
+                }
+                else
+                {
+                    @foreach (var w in Model.Warehouses.Items)
+                    {
+                        <a class="dw-item" href="/WarehouseDetail/@w.LocationID" style="text-decoration:none;cursor:pointer;transition:border-color 180ms ease;">
+                            <div class="dw-avatar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </div>
+                            <div class="dw-item-info">
+                                <div class="dw-item-name">@w.Name</div>
+                                <div class="dw-item-meta">@w.Address</div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div class="dw-tag" title="Location ID: @w.LocationID">
+                                    @(w.LocationID.ToString().Length > 8 ? w.LocationID.ToString()[..8] + "…" : w.LocationID.ToString())
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </div>
+                        </a>
+                    }
+
+                }
+            </div>
+        </div>
+
+        <!-- ═══ DELIVERERS ═══ -->
+        <div class="dw-panel">
+            <div class="dw-panel-bar">
+                <div class="dw-panel-bar-left">
+                    <div class="dw-panel-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="dw-panel-title">Deliverers</div>
+                        <div class="dw-panel-count">
+                            @if (Model.Deliverers?.Items != null)
+                            {<span>@Model.Deliverers.Items.Count affiliate@(Model.Deliverers.Items.Count == 1 ? "" : "s")</span>}
+                            else
+                            {<span>Loading…</span>}
+                        </div>
+                    </div>
+                </div>
+                <button class="dw-btn-add" id="dwOpenAffiliate" aria-label="Add affiliate">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add
+                </button>
+            </div>
+
+            <div class="dw-panel-body">
+                @if (Model.Deliverers?.Items == null || Model.Deliverers.Items.Count == 0)
+                {
+                    <div class="dw-empty">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        No deliverers found
+                    </div>
+                }
+                else
+                {
+                    @foreach (var d in Model.Deliverers.Items)
+                    {
+                        <div class="dw-item">
+                            <div class="dw-avatar">@d.Username[0].ToString().ToUpper()</div>
+                            <div class="dw-item-info">
+                                <div class="dw-item-name">@d.Username</div>
+                                <div class="dw-item-meta">@(d.Email ?? d.ContactPhone ?? "—")</div>
+                            </div>
+                            <div class="dw-tag" title="Affiliation ID: @d.AffiliationId">
+                                AFF-@(d.AffiliationId.ToString().Length > 6 ? d.AffiliationId.ToString()[..6] : d.AffiliationId.ToString())
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+    </div><!-- /dw-grid -->
+
+    <!-- ── JWT Note ── -->
+    <div class="dw-note">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        These endpoints require JWT authentication ([Authorize]). If lists are empty due to 401/403, ensure the Bearer token is attached in ManagerHomeModel.
+    </div>
+
+</div><!-- /dw-page -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL  — Add Warehouse
+     ══════════════════════════════════════════════════════ -->
+<div class="dw-modal-wrap" id="dwWarehouseModal" role="dialog" aria-modal="true" aria-labelledby="dwWhTitle">
+    <div class="dw-modal">
+        <div class="dw-modal-top">
+            <div class="dw-modal-heading">
+                <div class="dw-modal-heading-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <span id="dwWhTitle">Add Warehouse</span>
+            </div>
+            <button class="dw-modal-x" id="dwCloseWarehouse" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="dw-alert" id="dwWhError"></div>
+
+        <div class="dw-field">
+            <label class="dw-label" for="dwWhName">Warehouse Name</label>
+            <input class="dw-input" id="dwWhName" type="text" placeholder="e.g. Hanoi Central Hub" autocomplete="off" />
+        </div>
+
+        <div class="dw-field">
+            <label class="dw-label" for="dwWhAddress">Address</label>
+            <input class="dw-input" id="dwWhAddress" type="text" placeholder="Move the pin on the map to auto-fill" autocomplete="off" />
+        </div>
+
+        <div class="dw-field">
+            <label class="dw-label">Pick location on map</label>
+            <div id="dwWhMap" class="dw-map"></div>
+            <div class="dw-map-help">Drag the marker or click the map. Address, latitude and longitude will update automatically.</div>
+        </div>
+
+        <div class="dw-field">
+            <div class="dw-coord-row">
+                <div>
+                    <label class="dw-label" for="dwWhLat">Latitude</label>
+                    <input class="dw-input" id="dwWhLat" type="text" inputmode="decimal" placeholder="—" readonly />
+                </div>
+                <div>
+                    <label class="dw-label" for="dwWhLng">Longitude</label>
+                    <input class="dw-input" id="dwWhLng" type="text" inputmode="decimal" placeholder="—" readonly />
+                </div>
+            </div>
+        </div>
+
+        <div class="dw-modal-foot">
+            <button class="dw-btn-cancel" id="dwCancelWarehouse">Cancel</button>
+            <button class="dw-btn-submit" id="dwSubmitWarehouse">Create Warehouse</button>
+        </div>
     </div>
 </div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL  — Add Affiliate
+     ══════════════════════════════════════════════════════ -->
+<div class="dw-modal-wrap" id="dwAffiliateModal" role="dialog" aria-modal="true" aria-labelledby="dwAffTitle">
+    <div class="dw-modal">
+        <div class="dw-modal-top">
+            <div class="dw-modal-heading">
+                <div class="dw-modal-heading-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <span id="dwAffTitle">Add Affiliate</span>
+            </div>
+            <button class="dw-modal-x" id="dwCloseAffiliate" aria-label="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="dw-alert" id="dwAffError"></div>
+
+        <div class="dw-field">
+            <label class="dw-label" for="dwAffWarehouseSelect">Warehouse</label>
+            <select class="dw-input" id="dwAffWarehouseSelect">
+                <option value="">— Select a warehouse —</option>
+                @if (Model.Warehouses?.Items != null)
+                {
+                    foreach (var w in Model.Warehouses.Items)
+                    {
+                        <option value="@w.LocationID">@w.Name (@(w.Address ?? "No address"))</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="dw-field">
+            <label class="dw-label" for="dwAffPrimary">
+                Primary Location ID
+                <span class="dw-label-opt">(optional)</span>
+            </label>
+            <input class="dw-input" id="dwAffPrimary" type="text" placeholder="GUID (optional)" autocomplete="off" />
+        </div>
+
+        <div class="dw-modal-foot">
+            <button class="dw-btn-cancel" id="dwCancelAffiliate">Cancel</button>
+            <button class="dw-btn-submit" id="dwSubmitAffiliate">Create Affiliate</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ── Action report (response) ── -->
+<div class="dw-report" id="dwReport" role="status" aria-live="polite" aria-label="Action report">
+    <div class="dw-report-bar">
+        <div class="dw-report-title">
+            <span>Action Report</span>
+            <span class="dw-report-badge" id="dwReportBadge">—</span>
+        </div>
+        <button class="dw-report-x" id="dwReportClose" type="button" aria-label="Close report">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="dw-report-body">
+        <div class="dw-report-msg" id="dwReportMsg">—</div>
+        <div class="dw-report-meta" id="dwReportMeta">—</div>
+        <pre class="dw-report-pre" id="dwReportDetails"></pre>
+    </div>
+</div>
+
+
+@section Scripts {
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ── Report UI ────────────────────────────────────────── */
+  var reportEl = document.getElementById('dwReport');
+  var badgeEl = document.getElementById('dwReportBadge');
+  var msgEl = document.getElementById('dwReportMsg');
+  var metaEl = document.getElementById('dwReportMeta');
+  var detailsEl = document.getElementById('dwReportDetails');
+  var closeBtn = document.getElementById('dwReportClose');
+  var hideTimer = null;
+
+  function safePretty(obj) {
+    try { return JSON.stringify(obj, null, 2); } catch { return String(obj ?? ''); }
+  }
+
+  function showReport(opts) {
+    if (!reportEl) return;
+    if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+
+    var ok = !!opts.ok;
+    var title = opts.title || 'Action';
+    var status = opts.status || '';
+    var message = opts.message || (ok ? 'Success' : 'Failed');
+    var details = opts.details ?? '';
+
+    badgeEl.classList.remove('dw-ok', 'dw-err');
+    badgeEl.textContent = ok ? 'SUCCESS' : 'ERROR';
+    badgeEl.classList.add(ok ? 'dw-ok' : 'dw-err');
+
+    msgEl.textContent = title + ' — ' + message;
+    metaEl.textContent = status ? ('HTTP ' + status) : '';
+
+    if (typeof details === 'object') {
+      detailsEl.textContent = safePretty(details);
+    } else {
+      detailsEl.textContent = String(details || '');
+    }
+
+    reportEl.classList.add('dw-show');
+
+    // auto-hide after 9s on success; keep errors visible
+    if (ok) {
+      hideTimer = setTimeout(function () {
+        reportEl.classList.remove('dw-show');
+      }, 11000);
+    }
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function () {
+      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+      reportEl.classList.remove('dw-show');
+    });
+  }
+
+  /* ── Helpers ──────────────────────────────────────────── */
+  function openDwModal(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.add('dw-open'); el.querySelector('.dw-input')?.focus(); }
+  }
+  function closeDwModal(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('dw-open');
+      el.querySelectorAll('.dw-input').forEach(function(i){ i.value = ''; });
+      el.querySelectorAll('.dw-alert').forEach(function(a){ a.classList.remove('dw-show'); a.textContent = ''; });
+      el.querySelectorAll('.dw-btn-submit').forEach(function(b){ b.classList.remove('dw-loading'); });
+    }
+  }
+
+  /* Click-outside & Escape to close */
+  document.querySelectorAll('.dw-modal-wrap').forEach(function(wrap) {
+    wrap.addEventListener('click', function(e) { if (e.target === wrap) closeDwModal(wrap.id); });
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.dw-modal-wrap.dw-open').forEach(function(m) { closeDwModal(m.id); });
+      if (reportEl?.classList.contains('dw-show')) reportEl.classList.remove('dw-show');
+    }
+  });
+
+  /* ── Antiforgery token (required for Razor Page POST handlers) ── */
+  function getAntiforgeryToken() {
+    var el = document.querySelector('input[name="__RequestVerificationToken"]');
+    return el ? el.value : '';
+  }
+
+  /* ── Generic BFF form post → Razor Page handler ── */
+  async function postToHandler(handler, fields, errEl, btn, successModalId, reportTitle) {
+    errEl.classList.remove('dw-show');
+    btn.classList.add('dw-loading');
+
+    var fd = new FormData();
+    fd.append('__RequestVerificationToken', getAntiforgeryToken());
+    Object.entries(fields).forEach(function(kv) { if (kv[1] !== null && kv[1] !== '') fd.append(kv[0], kv[1]); });
+
+    try {
+      var res = await fetch('?handler=' + handler, { method: 'POST', body: fd });
+      var json = await res.json().catch(function() { return null; });
+
+      if (!res.ok) {
+        var msg = (json && json.message) ? json.message : ('Error ' + res.status);
+        errEl.textContent = msg;
+        errEl.classList.add('dw-show');
+        btn.classList.remove('dw-loading');
+
+        showReport({
+          ok: false,
+          title: reportTitle || handler,
+          status: res.status,
+          message: msg,
+          details: json && json.details ? json.details : (json || 'No response body')
+        });
+        return;
+      }
+
+      closeDwModal(successModalId);
+      btn.classList.remove('dw-loading');
+
+      showReport({
+        ok: true,
+        title: reportTitle || handler,
+        status: res.status,
+        message: (json && json.message) ? json.message : 'OK',
+        details: json && (json.details ?? json)
+      });
+
+      // Refresh data after a short delay so user can see the report
+      setTimeout(function(){ location.reload(); }, 600);
+    } catch (err) {
+      errEl.textContent = 'Network error — ' + err.message;
+      errEl.classList.add('dw-show');
+      btn.classList.remove('dw-loading');
+
+      showReport({
+        ok: false,
+        title: reportTitle || handler,
+        message: 'Network error',
+        details: err && err.stack ? err.stack : String(err)
+      });
+    }
+  }
+
+  /* ── Warehouse Modal ──────────────────────────────────── */
+  document.getElementById('dwOpenWarehouse').addEventListener('click', function() { openDwModal('dwWarehouseModal'); });
+  document.getElementById('dwCloseWarehouse').addEventListener('click', function() { closeDwModal('dwWarehouseModal'); });
+  document.getElementById('dwCancelWarehouse').addEventListener('click', function() { closeDwModal('dwWarehouseModal'); });
+
+  document.getElementById('dwSubmitWarehouse').addEventListener('click', function() {
+    var name = document.getElementById('dwWhName').value.trim();
+    var addr = document.getElementById('dwWhAddress').value.trim();
+    var errEl = document.getElementById('dwWhError');
+
+    if (!name || !addr) {
+      errEl.textContent = 'Warehouse Name and Address are required.';
+      errEl.classList.add('dw-show');
+      return;
+    }
+
+    postToHandler('AddWarehouse', {
+      name:      name,
+      address:   addr,
+      latitude:  document.getElementById('dwWhLat').value.trim(),
+      longitude: document.getElementById('dwWhLng').value.trim()
+    }, errEl, this, 'dwWarehouseModal', 'Add Warehouse');
+  });
+
+  /* ── Affiliate Modal ──────────────────────────────────── */
+  document.getElementById('dwOpenAffiliate').addEventListener('click', function() { openDwModal('dwAffiliateModal'); });
+  document.getElementById('dwCloseAffiliate').addEventListener('click', function() { closeDwModal('dwAffiliateModal'); });
+  document.getElementById('dwCancelAffiliate').addEventListener('click', function() { closeDwModal('dwAffiliateModal'); });
+
+  document.getElementById('dwSubmitAffiliate').addEventListener('click', function() {
+    var warehouseId = document.getElementById('dwAffWarehouseSelect').value;
+    var errEl = document.getElementById('dwAffError');
+
+    if (!warehouseId) {
+      errEl.textContent = 'Warehouse is required.';
+      errEl.classList.add('dw-show');
+      return;
+    }
+
+    postToHandler('AddDeliverer', {
+      warehouseLocationId:        warehouseId,
+      affiliatePrimaryLocationId: document.getElementById('dwAffPrimary').value.trim()
+    }, errEl, this, 'dwAffiliateModal', 'Add Affiliate');
+  });
+
+  /* ── Map and geocoding for Warehouse modal ─────────────── */
+  var whMap = null;
+  var whMarker = null;
+  var geocodeTimer = null;
+
+  function setLatLngInputs(latlng) {
+    var lat = +latlng.lat;
+    var lng = +latlng.lng;
+    document.getElementById('dwWhLat').value = lat.toFixed(6);
+    document.getElementById('dwWhLng').value = lng.toFixed(6);
+  }
+
+  async function reverseGeocode(latlng) {
+    // Debounce requests
+    if (geocodeTimer) window.clearTimeout(geocodeTimer);
+    geocodeTimer = window.setTimeout(async function () {
+      try {
+        var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + encodeURIComponent(latlng.lat) + '&lon=' + encodeURIComponent(latlng.lng);
+        var res = await fetch(url, {
+          headers: {
+            // Nominatim usage policy encourages identifying the app
+            'Accept': 'application/json'
+          }
+        });
+        if (!res.ok) return;
+        var json = await res.json();
+        if (json && json.display_name) {
+          var addrEl = document.getElementById('dwWhAddress');
+          // Only overwrite if user hasn't manually typed something different
+          if (!addrEl.dataset.userEdited || addrEl.dataset.userEdited !== 'true') {
+            addrEl.value = json.display_name;
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }, 450);
+  }
+
+  function ensureWarehouseMap() {
+    if (whMap) return;
+
+    var mapEl = document.getElementById('dwWhMap');
+    if (!mapEl) return;
+
+    // Default center: Hanoi
+    var start = { lat: 21.0285, lng: 105.8542 };
+
+    whMap = L.map(mapEl, { zoomControl: true }).setView([start.lat, start.lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(whMap);
+
+    whMarker = L.marker([start.lat, start.lng], { draggable: true }).addTo(whMap);
+
+    function updateFromLatLng(latlng) {
+      setLatLngInputs(latlng);
+      reverseGeocode(latlng);
+    }
+
+    updateFromLatLng(start);
+
+    whMarker.on('dragend', function () {
+      updateFromLatLng(whMarker.getLatLng());
+    });
+
+    whMap.on('click', function (e) {
+      whMarker.setLatLng(e.latlng);
+      updateFromLatLng(e.latlng);
+    });
+
+    // track manual edits to address
+    var addrEl = document.getElementById('dwWhAddress');
+    addrEl.addEventListener('input', function () {
+      addrEl.dataset.userEdited = 'true';
+    });
+  }
+
+  // Hook into modal open so Leaflet can properly size itself
+  var btnOpen = document.getElementById('dwOpenWarehouse');
+  if (btnOpen) {
+    btnOpen.addEventListener('click', function () {
+      // modal open is handled by existing code; we just init map after it opens
+      window.setTimeout(function () {
+        ensureWarehouseMap();
+        if (whMap) { whMap.invalidateSize(); }
+        // reset address override on every open
+        var addrEl = document.getElementById('dwWhAddress');
+        if (addrEl) addrEl.dataset.userEdited = 'false';
+      }, 120);
+    });
+  }
+
+})();
+</script>
+}

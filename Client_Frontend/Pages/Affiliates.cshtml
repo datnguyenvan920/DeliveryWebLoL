@@ -1,0 +1,236 @@
+@page
+@model Client_Frontend.Pages.AffiliatesModel
+@{
+    ViewData["Title"] = "Affiliates";
+    Layout = "_ManagerLayout";
+}
+
+@section Head {
+<style>
+/* Page shell */
+.afl-page { padding: 28px 28px 60px; }
+
+.afl-header { display:flex; align-items:flex-end; justify-content:space-between; gap: 16px; flex-wrap:wrap; margin-bottom: 18px; }
+.afl-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    color: #fff;
+}
+.afl-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+/* Grid: responsive without media query */
+.afl-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 18px; }
+
+/* Panel */
+.afl-panel {
+    background: #12161D;
+    border: 1px solid #1C222B;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* Tools */
+.afl-tools { display:flex; align-items:center; gap: 10px; flex-wrap:wrap; }
+.afl-input {
+    background: #0B0E12;
+    border: 1px solid #1C222B;
+    border-radius: 10px;
+    color: #fff;
+    padding: 9px 12px;
+    font-size: 13px;
+    outline: none;
+    min-width: 240px;
+}
+.afl-input:focus { border-color:#F5C71B; box-shadow:0 0 0 3px rgba(245,199,27,0.1); }
+
+.afl-chip {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(245,199,27,0.22);
+    background: rgba(245,199,27,0.10);
+    color: rgba(245,199,27,0.85);
+}
+
+/* Table */
+.afl-table-wrap { overflow:auto; }
+.afl-table { width:100%; border-collapse: collapse; }
+.afl-th, .afl-td { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align:left; }
+.afl-th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.35);
+    background: rgba(11,14,18,0.55);
+}
+.afl-td { font-size: 13px; color: rgba(255,255,255,0.75); }
+.afl-row:hover { background: #1e2530; }
+
+.afl-tag {
+    display:inline-flex;
+    align-items:center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(59,130,246,0.10);
+    border-color: rgba(59,130,246,0.25);
+    color: rgba(96,165,250,0.95);
+}
+
+.afl-empty { padding: 44px 18px; text-align:center; color: rgba(255,255,255,0.30); }
+.afl-empty svg { opacity: 0.25; display:block; margin: 0 auto 10px; }
+</style>
+}
+
+<div class="afl-page">
+    <div class="afl-header">
+        <div>
+            <div class="afl-title">Affiliates</div>
+            <div class="afl-sub">Deliverers and affiliators linked to warehouses you own (same affiliation id)</div>
+        </div>
+        <div class="afl-chip">@(Model.Deliverers?.Items?.Count ?? 0) deliverer(s) · @(Model.Affiliators?.Items?.Count ?? 0) affiliator(s)</div>
+    </div>
+
+    <div class="afl-grid">
+
+        <!-- Deliverers (Drivers) -->
+        <div class="afl-panel">
+            <div class="afl-panel-head">
+                <div class="afl-panel-title">Deliverers</div>
+                <div class="afl-tools">
+                    <input class="afl-input" id="aflSearchDeliverers" type="search" placeholder="Search deliverers..." />
+                </div>
+            </div>
+
+            <div class="afl-table-wrap">
+                @if (Model.Deliverers?.Items == null || Model.Deliverers.Items.Count == 0)
+                {
+                    <div class="afl-empty">
+                        <!-- ...existing empty icon/text... -->
+                        No deliverers found.
+                    </div>
+                }
+                else
+                {
+                    <table class="afl-table" id="aflTableDeliverers">
+                        <thead>
+                            <tr>
+                                <th class="afl-th">Username</th>
+                                <th class="afl-th">Email</th>
+                                <th class="afl-th">Phone</th>
+                                <th class="afl-th">Affiliation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var a in Model.Deliverers.Items)
+                        {
+                            <tr class="afl-row" data-search="@((a.Username + " " + (a.Email ?? "") + " " + (a.ContactPhone ?? "") + " " + (a.AffiliationId ?? "")).ToLowerInvariant())">
+                                <td class="afl-td" style="font-weight:800;">@a.Username</td>
+                                <td class="afl-td">@(a.Email ?? "—")</td>
+                                <td class="afl-td">@(a.ContactPhone ?? "—")</td>
+                                <td class="afl-td" style="font-family:monospace;">
+                                    @if (!string.IsNullOrWhiteSpace(a.AffiliationId))
+                                    {
+                                        <span class="afl-tag">AFF-@((a.AffiliationId.Length > 6 ? a.AffiliationId[..6] : a.AffiliationId))</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:rgba(255,255,255,0.35);">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <!-- Affiliators (Affiliate role users) -->
+        <div class="afl-panel">
+            <div class="afl-panel-head">
+                <div class="afl-panel-title">Affiliators</div>
+                <div class="afl-tools">
+                    <input class="afl-input" id="aflSearchAffiliators" type="search" placeholder="Search affiliators..." />
+                </div>
+            </div>
+
+            <div class="afl-table-wrap">
+                @if (Model.Affiliators?.Items == null || Model.Affiliators.Items.Count == 0)
+                {
+                    <div class="afl-empty">
+                        <!-- ...existing empty icon/text... -->
+                        No affiliators found.
+                    </div>
+                }
+                else
+                {
+                    <table class="afl-table" id="aflTableAffiliators">
+                        <thead>
+                            <tr>
+                                <th class="afl-th">Username</th>
+                                <th class="afl-th">Email</th>
+                                <th class="afl-th">Phone</th>
+                                <th class="afl-th">Affiliation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var a in Model.Affiliators.Items)
+                        {
+                            <tr class="afl-row" data-search="@((a.Username + " " + (a.Email ?? "") + " " + (a.ContactPhone ?? "") + " " + (a.AffiliationId ?? "")).ToLowerInvariant())">
+                                <td class="afl-td" style="font-weight:800;">@a.Username</td>
+                                <td class="afl-td">@(a.Email ?? "—")</td>
+                                <td class="afl-td">@(a.ContactPhone ?? "—")</td>
+                                <td class="afl-td" style="font-family:monospace;">
+                                    @if (!string.IsNullOrWhiteSpace(a.AffiliationId))
+                                    {
+                                        <span class="afl-tag">AFF-@((a.AffiliationId.Length > 6 ? a.AffiliationId[..6] : a.AffiliationId))</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:rgba(255,255,255,0.35);">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function(){
+    'use strict';
+
+    function wireSearch(inputId, tableId) {
+        var search = document.getElementById(inputId);
+        var table = document.getElementById(tableId);
+        if (!search || !table) return;
+
+        search.addEventListener('input', function(){
+            var q = (search.value || '').trim().toLowerCase();
+            table.querySelectorAll('tbody tr').forEach(function(tr){
+                var hay = tr.getAttribute('data-search') || '';
+                tr.style.display = (q === '' || hay.indexOf(q) >= 0) ? '' : 'none';
+            });
+        });
+    }
+
+    wireSearch('aflSearchDeliverers', 'aflTableDeliverers');
+    wireSearch('aflSearchAffiliators', 'aflTableAffiliators');
+})();
+</script>
+}

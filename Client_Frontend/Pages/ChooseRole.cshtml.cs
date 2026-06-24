@@ -52,6 +52,18 @@ namespace Client_Frontend.Pages
                 return RedirectToPage("/ManagerHome");
             }
 
+            if (SelectedRole == 3)
+            {
+                TempData.Remove("username");
+                return RedirectToPage("/DriverDashboard");
+            }
+
+            if (SelectedRole == 2)
+            {
+                TempData.Remove("username");
+                return RedirectToPage("/AffiliateDashboard");
+            }
+
             Message = "Role updated successfully. Please login again.";
             // Clear TempData so user won't return here unexpectedly
             TempData.Remove("username");

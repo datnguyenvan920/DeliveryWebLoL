@@ -37,6 +37,7 @@ namespace DeliveryWebLoL.Models
         Preparing,
         ReadyForPickup,
         InTransit,
+        Delivered,
         Completed,
         Cancelled
     }

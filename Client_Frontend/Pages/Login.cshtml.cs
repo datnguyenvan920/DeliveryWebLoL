@@ -86,6 +86,21 @@ namespace Client_Frontend.Pages
                 return RedirectToPage("/ManagerHome");
             }
 
+            if (roleValue == 3)
+            {
+                return RedirectToPage("/DriverDashboard");
+            }
+
+            if (roleValue == 0)
+            {
+                return RedirectToPage("/AdminDashboard");
+            }
+
+            if (roleValue == 2)
+            {
+                return RedirectToPage("/AffiliateDashboard");
+            }
+
             Message = "Login successful (server-side).";
             return Page();
         }

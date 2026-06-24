@@ -14,6 +14,9 @@ namespace Client_Frontend
             // Add services to the container.
             builder.Services.AddRazorPages();
 
+            // Needed by _ManagerLayout to read Session (username) from the Razor view
+            builder.Services.AddHttpContextAccessor();
+
             // Session storage (for access token)
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>

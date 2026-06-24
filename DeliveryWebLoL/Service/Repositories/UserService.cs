@@ -85,11 +85,52 @@ namespace DeliveryWebLoL.Service.Repositories
         public async Task<bool> UpdateRoleAsync(User user, UserRole newRole, string extraData)
         {
             if (user == null) return false;
+
+            var prevRole = user.Role;
             user.Role = newRole;
-            if (newRole == UserRole.Affiliate && !extraData.IsNullOrEmpty())
+
+            // If the user is becoming an Affiliate and has no affiliation/destination yet,
+            // create a personal affiliate Location and store its GUID in user.AffiliationId.
+            // This LocationID will be used as Order.DestinationLocationID.
+            if (newRole == UserRole.Affiliate && prevRole == UserRole.NewUser && string.IsNullOrWhiteSpace(user.AffiliationId))
             {
-                user.AffiliationId = extraData;
+                var loc = new Location
+                {
+                    LocationID = Guid.NewGuid(),
+                    OwnerUserID = user.UserID,
+                    Name = $"Affiliate-{user.Username}",
+                    Address = null,
+                    Latitude = null,
+                    Longitude = null,
+                    LocationType = LocationType.Affiliate
+                };
+
+                await _db.Locations.AddAsync(loc);
+                user.AffiliationId = loc.LocationID.ToString();
             }
+
+            // extraData semantics:
+            // - If extraData is GUID: interpret as WarehouseLocationId and map to AffiliateWarehouse.AffiliationId.
+            // - Else (non-GUID): IGNORE (do not overwrite existing AffiliationId).
+            if (!extraData.IsNullOrEmpty())
+            {
+                var trimmed = extraData.Trim();
+
+                if (Guid.TryParse(trimmed, out var warehouseLocationId) && warehouseLocationId != Guid.Empty)
+                {
+                    var affiliationId = await _db.AffiliateWarehouses
+                        .AsNoTracking()
+                        .Where(aw => aw.WarehouseLocationId == warehouseLocationId)
+                        .Select(aw => (int?)aw.AffiliationId)
+                        .FirstOrDefaultAsync();
+
+                    if (!affiliationId.HasValue)
+                        return false;
+
+                    user.AffiliationId = affiliationId.Value.ToString();
+                }
+            }
+
             _db.Users.Update(user);
             await _db.SaveChangesAsync();
             return true;
@@ -101,6 +142,31 @@ namespace DeliveryWebLoL.Service.Repositories
             user.RefreshTokenExpiryTime = null;
             _db.Users.Update(user);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<bool> ClaimAffiliateAffiliationAsync(Guid userId, Guid affiliateLocationCode)
+        {
+            if (userId == Guid.Empty || affiliateLocationCode == Guid.Empty) return false;
+
+            var user = await _db.Users.SingleOrDefaultAsync(u => u.UserID == userId);
+            if (user == null) return false;
+
+            // Only allow the recovery if there's no affiliation yet.
+            if (!string.IsNullOrWhiteSpace(user.AffiliationId)) return false;
+
+            // In this flow, the "code" is the WarehouseLocationId.
+            var affId = await _db.AffiliateWarehouses
+                .AsNoTracking()
+                .Where(aw => aw.WarehouseLocationId == affiliateLocationCode)
+                .Select(aw => (int?)aw.AffiliationId)
+                .FirstOrDefaultAsync();
+
+            if (!affId.HasValue) return false;
+
+            user.AffiliationId = affId.Value.ToString();
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+            return true;
         }
     }
 }

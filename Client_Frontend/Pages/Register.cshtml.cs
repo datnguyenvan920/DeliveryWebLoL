@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Client_Frontend.Pages
 {
@@ -18,6 +18,9 @@ namespace Client_Frontend.Pages
         [BindProperty]
         public RegisterInput Input { get; set; } = new();
 
+        [BindProperty(SupportsGet = true)]
+        public string? ReturnUrl { get; set; }
+
         public string? Message { get; set; }
 
         public class RegisterInput
@@ -29,9 +32,34 @@ namespace Client_Frontend.Pages
             public int Role { get; set; } = 4;
         }
 
+        private static string? TryExtractMessage(string? body)
+        {
+            if (string.IsNullOrWhiteSpace(body)) return null;
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (doc.RootElement.TryGetProperty("message", out var msg) && msg.ValueKind == JsonValueKind.String)
+                        return msg.GetString();
+                    if (doc.RootElement.TryGetProperty("error", out var err) && err.ValueKind == JsonValueKind.String)
+                        return err.GetString();
+                }
+            }
+            catch
+            {
+                // non-JSON body
+            }
+
+            return body.Length > 400 ? body[..400] + "…" : body;
+        }
+
         // Server-side registration proxy
         public async Task<IActionResult> OnPostServerRegisterAsync()
         {
+            if (!ModelState.IsValid)
+                return Page();
+
             var client = _httpClientFactory.CreateClient("Api");
             var payload = new
             {
@@ -43,15 +71,20 @@ namespace Client_Frontend.Pages
             };
 
             var resp = await client.PostAsJsonAsync("/auth/register", payload);
-            var content = await resp.Content.ReadFromJsonAsync<object>();
+            var raw = await resp.Content.ReadAsStringAsync();
+
             if (!resp.IsSuccessStatusCode)
             {
-                Message = $"Register failed: {resp.StatusCode}";
+                var extracted = TryExtractMessage(raw);
+                Message = extracted ?? $"Register failed: {(int)resp.StatusCode} {resp.ReasonPhrase}";
                 return Page();
             }
 
-            Message = "Registration request sent (server-side).";
-            return Page();
+            // On success: go to return url if safe, otherwise to Login.
+            if (!string.IsNullOrWhiteSpace(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+                return LocalRedirect(ReturnUrl);
+
+            return RedirectToPage("/Login", new { registered = "1" });
         }
     }
 }

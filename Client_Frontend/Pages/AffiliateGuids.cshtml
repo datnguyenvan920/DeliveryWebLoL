@@ -1,0 +1,248 @@
+@page
+@model Client_Frontend.Pages.AffiliateGuidsModel
+@{
+    ViewData["Title"] = "Affiliate GUIDs";
+    Layout = "_ManagerLayout";
+}
+
+@section Head {
+<style>
+    .ag-page { padding: 28px 28px 60px; max-width: 1100px; margin: 0 auto; }
+
+    .ag-header { display:flex; justify-content:space-between; align-items:flex-end; gap: 16px; flex-wrap:wrap; margin-bottom: 18px; }
+    .ag-title { font-family: 'Russo One', sans-serif; font-size: 22px; letter-spacing: 0.02em; color: #fff; }
+    .ag-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 4px; max-width: 70ch; }
+
+    .ag-panel {
+        background: #12161D;
+        border: 1px solid #1C222B;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-top: 14px;
+    }
+
+    .ag-panel-head {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        background: rgba(11,14,18,0.35);
+    }
+
+    .ag-panel-title { font-weight: 900; letter-spacing: .06em; text-transform: uppercase; font-size: 10px; color: rgba(255,255,255,0.4); }
+
+    .ag-btn {
+        display:inline-flex; align-items:center; gap: 8px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(245,199,27,0.22);
+        background: rgba(245,199,27,0.10);
+        color: rgba(245,199,27,0.95);
+        font-family: 'Russo One', sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+    .ag-btn:hover { filter: brightness(1.12); }
+
+    .ag-table-wrap { overflow:auto; }
+    .ag-table { width:100%; border-collapse: collapse; }
+    .ag-th, .ag-td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align:left; }
+    .ag-th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); background: rgba(11,14,18,0.55); }
+    .ag-td { font-size: 13px; color: rgba(255,255,255,0.75); }
+
+    .ag-guid { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 12.5px; color: rgba(255,255,255,0.85); }
+
+    .ag-empty { padding: 44px 16px; text-align:center; color: rgba(255,255,255,0.30); }
+
+    .ag-pill {
+        display:inline-flex; align-items:center; gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(245,199,27,0.22);
+        background: rgba(245,199,27,0.08);
+        color: rgba(245,199,27,0.9);
+        font-size: 10px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        font-weight: 900;
+    }
+
+    .ag-copy {
+        width: 34px; height: 34px;
+        border-radius: 10px;
+        background: #171C25;
+        border: 1px solid #1C222B;
+        color: rgba(255,255,255,0.65);
+        display:inline-flex; align-items:center; justify-content:center;
+        cursor:pointer;
+    }
+    .ag-copy:hover { color: #F5C71B; border-color: rgba(245,199,27,0.35); }
+    .ag-row:hover { background: #1e2530; }
+
+    .ag-muted { color: rgba(255,255,255,0.4); }
+</style>
+}
+
+<div class="ag-page">
+    <div class="ag-header">
+        <div>
+            <div class="ag-title">Affiliate GUIDs</div>
+            <div class="ag-sub">
+                Copy and share the <span class="ag-pill">AffiliationId</span> with your driver (Deliverer) and affiliator.
+                They must use the same GUID to access the Orders feature.
+            </div>
+        </div>
+        <button class="ag-btn" type="button" id="agCopyAll">
+            Copy all GUIDs
+        </button>
+    </div>
+
+    <div class="ag-panel">
+        <div class="ag-panel-head">
+            <div class="ag-panel-title">Warehouses linked in AffiliateWarehouse</div>
+            <div style="color: rgba(255,255,255,0.45); font-size: 12px;">
+                @(Model.LinkedWarehouses?.Count ?? 0) linked warehouse(s)
+            </div>
+        </div>
+
+        <div class="ag-table-wrap">
+            @if (Model.LinkedWarehouses == null || Model.LinkedWarehouses.Count == 0)
+            {
+                <div class="ag-empty">No linked warehouses found. Link a warehouse to an affiliate first.</div>
+            }
+            else
+            {
+                <table class="ag-table" aria-label="Linked warehouse list">
+                    <thead>
+                        <tr>
+                            <th class="ag-th" style="width: 64px;">#</th>
+                            <th class="ag-th">Warehouse</th>
+                            <th class="ag-th">Warehouse GUID</th>
+                            <th class="ag-th" style="width: 64px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for (var i = 0; i < Model.LinkedWarehouses.Count; i++)
+                    {
+                        var w = Model.LinkedWarehouses[i];
+                        <tr class="ag-row">
+                            <td class="ag-td">@(i + 1)</td>
+                            <td class="ag-td" style="font-weight:800;">@w.Name</td>
+                            <td class="ag-td ag-guid">@w.LocationId</td>
+                            <td class="ag-td" style="text-align:right;">
+                                <button type="button" class="ag-copy" title="Copy" aria-label="Copy">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="ag-panel">
+        <div class="ag-panel-head">
+            <div class="ag-panel-title">Affiliations (AffiliationId GUIDs)</div>
+            <div style="color: rgba(255,255,255,0.45); font-size: 12px;">
+                @(Model.AffiliationIds?.Count ?? 0) unique GUID(s)
+            </div>
+        </div>
+
+        <div class="ag-table-wrap">
+            @if (Model.AffiliationIds == null || Model.AffiliationIds.Count == 0)
+            {
+                <div class="ag-empty">No affiliation GUIDs found yet. Add a deliverer / affiliator to generate one.</div>
+            }
+            else
+            {
+                <table class="ag-table" aria-label="Affiliate GUID list">
+                    <thead>
+                        <tr>
+                            <th class="ag-th" style="width: 64px;">#</th>
+                            <th class="ag-th">Affiliation GUID</th>
+                            <th class="ag-th" style="width: 64px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for (var i = 0; i < Model.AffiliationIds.Count; i++)
+                    {
+                        var guid = Model.AffiliationIds[i];
+                        <tr class="ag-row">
+                            <td class="ag-td">@(i + 1)</td>
+                            <td class="ag-td ag-guid">@guid</td>
+                            <td class="ag-td" style="text-align:right;">
+                                <button type="button" class="ag-copy" title="Copy" aria-label="Copy">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function(){
+    'use strict';
+
+    function copyText(text) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text);
+            return;
+        }
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+    }
+
+    // row copy (captures both tables)
+    document.querySelectorAll('.ag-row').forEach(function(row){
+        var btn = row.querySelector('.ag-copy');
+        if (!btn) return;
+        btn.addEventListener('click', function(){
+            var guidCell = row.querySelector('.ag-guid');
+            copyText((guidCell && guidCell.textContent || '').trim());
+        });
+    });
+
+    // copy all affiliation GUIDs only
+    var copyAllBtn = document.getElementById('agCopyAll');
+    if (copyAllBtn) {
+        copyAllBtn.addEventListener('click', function(){
+            var all = [];
+            // Copy only from the affiliation table (2nd panel) by selecting after its header title.
+            // Keep it simple: take all .ag-guid values but filter to ones that are not warehouse GUIDs by checking for dashes.
+            // (Warehouse GUIDs are also GUIDs; so copy all affiliation ids from server ordering.)
+            document.querySelectorAll('.ag-panel:last-of-type .ag-guid').forEach(function(el){
+                var t = (el.textContent || '').trim();
+                if (t) all.push(t);
+            });
+            copyText(all.join('\n'));
+        });
+    }
+})();
+</script>
+}
